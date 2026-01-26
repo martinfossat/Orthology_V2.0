@@ -199,8 +199,12 @@ if __name__=="__main__":
                         temp_reg+=[float('NaN')]
                         continue
                     # This is the number of region of this type in this particular allele homology (i.e.)
-                    for num_reg in range(len(homologies[ref_orga][orga][orth_homo_id][prot_homo_ids][region_type])):
-                        temp_reg+=[float(homologies[ref_orga][orga][orth_homo_id][prot_homo_ids][region_type][num_reg]['norm'])]
+                    for num_reg in homologies[ref_org][orga][orth_homo_id][prot_homo_ids][region_type]:
+
+                        print(homologies[ref_org][orga][orth_homo_id][prot_homo_ids][region_type][num_reg].keys())
+                        print(homologies[ref_org][orga][orth_homo_id][prot_homo_ids][region_type][num_reg]['Homology'])
+
+                        temp_reg+=[float(homologies[ref_org][orga][orth_homo_id][prot_homo_ids][region_type][num_reg]['Homology'])]
                     # Average over overlapping regions of same region types
                     all_alleles[alle_ref]+=[np.mean(temp_reg)]
                 # For each reference allele, there is a number of other alleles

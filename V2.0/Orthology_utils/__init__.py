@@ -97,7 +97,7 @@ def find_matching_folded_domains(bounds,bounds_ref,seq_oth,seq_ref,length_max_ra
                 homo,normed_homo=get_homology_score(seq_oth_sub,seq_ref_sub,local=True)
                 if normed_homo>homology_min:
                     bound_match+=[str(bounds_ref[j,0])+'_'+str(bounds_ref[j,1])+'_&_'+str(bounds[i,0])+'_'+str(bounds[i,1])]
-                    match_score+=[normed_homo]
+                    match_score+=[[homo,normed_homo]]
                     bounds_all_ref+=[[bounds_ref[j,0],bounds_ref[j,1]]]
                     bonds_all_oth+=[[bounds[i,0],bounds[i,1]]]
 

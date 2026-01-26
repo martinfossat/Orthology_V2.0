@@ -167,12 +167,13 @@ if __name__=="__main__":
 
                             if min(len(seq_ref_raw),len(seq_raw))/max(len(seq_ref_raw),len(seq_raw))<length_ratio :
                                 continue
-                            print(seq_id,ref_id)
-                            print(len(seq_ref_raw),len(seq_raw))
+
+                            score,norm=OU.get_homology_score(seq_raw,seq_ref_raw,local=local)
                             Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]={}
                             Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["all"]={}
                             Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["all"][str(0)+'_'+str(len(seq_ref_raw))+'_&_'+str(0)+'_'+str(len(seq_raw))]={}
-                            Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["all"][str(0)+'_'+str(len(seq_ref_raw))+'_&_'+str(0)+'_'+str(len(seq_raw))]['Homology']=OU.get_homology_score(seq_raw,seq_ref_raw,local=local)
+                            Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["all"][str(0)+'_'+str(len(seq_ref_raw))+'_&_'+str(0)+'_'+str(len(seq_raw))]['Homology']=score
+                            Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["all"][str(0)+'_'+str(len(seq_ref_raw))+'_&_'+str(0)+'_'+str(len(seq_raw))]['Homology_ratio']=norm
                             for val_type in val_types_seq:
                                 val_ref=SeqProp.get_values(ref_id,"all",str(0)+'_'+str(len(seq_ref_raw)),val_type)
                                 val_oth=SeqProp.get_values(seq_id,"all",str(0)+'_'+str(len(seq_raw)),val_type)
@@ -185,7 +186,8 @@ if __name__=="__main__":
                             Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["FDs"]={}
                             for m in range(len(bound_match)):
                                 Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["FDs"][bound_match[m]]={}
-                                Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["FDs"][bound_match[m]]['Homology']=str(match_score[m])
+                                Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["FDs"][bound_match[m]]['Homology']=str(match_score[m][0])
+                                Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["FDs"][bound_match[m]]['Homology_ratio']=str(match_score[m][1])
                                 for val_type in val_types_seq:
                                     val_ref=SeqProp.get_values(ref_id,"FDs",bound_match[m].split('_&_')[0],val_type)
                                     val_oth=SeqProp.get_values(seq_id,"FDs",bound_match[m].split('_&_')[1],val_type)
@@ -206,10 +208,11 @@ if __name__=="__main__":
 
                                 Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["NFDs"][bounds_label]={}
                                 Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["NFDs"][bounds_label]['Homology']=str(score)
-
+                                Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id][ "NFDs"][bounds_label]['Homology_ratio']=str(norm)
                                 if bounds_label.split('_&_')[0] in bounds_labels_dis_ref and bounds_label.split('_&_')[1] in bounds_labels_dis:
                                     Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["IDRs"][bounds_label]={}
                                     Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["IDRs"][bounds_label]['Homology']=str(score)
+                                    Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["IDRs"][bounds_label]['Homology_ratio']=str(norm)
                                     for val_type in val_types_seq:
                                         val_ref=SeqProp.get_values(ref_id,"IDRs",bounds_label.split('_&_')[0],val_type)
                                         val_oth=SeqProp.get_values(seq_id,"IDRs",bounds_label.split('_&_')[1],val_type)
