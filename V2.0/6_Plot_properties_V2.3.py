@@ -15,6 +15,11 @@ import numpy as np
 import os
 import argparse
 
+
+#File was renamed from 4_Get_homology_scores_V1.5.py
+
+
+
 def plot_homology_scores(save_homo,prefix):
     plot_mean=np.zeros((len(region_types),len(species)))
     plot_std=np.zeros((len(region_types),len(species)))
