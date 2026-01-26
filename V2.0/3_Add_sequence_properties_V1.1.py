@@ -34,7 +34,7 @@ if __name__=="__main__":
     The output is a file containing the gene name and gene IDs for all species, and that is required to use subsequent programs.""")
     parser.add_argument("--file_orthologs","-fo",help='File name where the file is a json file containing created by the Ortholog program')
     parser.add_argument("--file_IDRs","-fi",help='File name where the file is a json file containing created by the Get_IDR program, contaning IDR domain boundaries')
-    parser.add_argument("--max_size_factor","-msf",help="Factor for the length of the otrholog array compared to the input gene list size. Must be integer, bigger number is slower, but if many orhtolog exists, may be necessary")
+    parser.add_argument("--max_size_factor","-msf",help="Factor for the length of the ortholog array compared to the input gene list size. Must be integer, bigger number is slower, but if many orhtolog exists, may be necessary")
     parser.add_argument("--delete_cross_refs","-dcr",help="Whether gene name that share an ortholog should be delete, so they don't appear twice.  1 is delete, 0 is keep.")
     args = parser.parse_args()
 
