@@ -177,7 +177,7 @@ if __name__=="__main__":
                             for val_type in val_types_seq:
                                 val_ref=SeqProp.get_values(ref_id,"all",str(0)+'_'+str(len(seq_ref_raw)),val_type)
                                 val_oth=SeqProp.get_values(seq_id,"all",str(0)+'_'+str(len(seq_raw)),val_type)
-                                Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["all"][str(0)+'_'+str(len(seq_ref_raw))+'_&_'+str(0)+'_'+str(len(seq_raw))][val_type]=str(val_oth/val_ref)
+                                Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["all"][str(0)+'_'+str(len(seq_ref_raw))+'_&_'+str(0)+'_'+str(len(seq_raw))][val_type]=str(val_oth-val_ref)
 
                             bounds,bounds_labels=SeqProp.get_bounds(seq_id,"FDs")
                             bounds_ref,bounds_labels_ref=SeqProp.get_bounds(ref_id,"FDs")
