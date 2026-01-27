@@ -191,7 +191,7 @@ if __name__=="__main__":
                                 for val_type in val_types_seq:
                                     val_ref=SeqProp.get_values(ref_id,"FDs",bound_match[m].split('_&_')[0],val_type)
                                     val_oth=SeqProp.get_values(seq_id,"FDs",bound_match[m].split('_&_')[1],val_type)
-                                    Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["FDs"][bound_match[m]][val_type]=str(val_oth/val_ref)
+                                    Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["FDs"][bound_match[m]][val_type]=str(val_oth-val_ref)
 
                             Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["IDRs"]={}
                             Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["NFDs"]={}
@@ -216,7 +216,7 @@ if __name__=="__main__":
                                     for val_type in val_types_seq:
                                         val_ref=SeqProp.get_values(ref_id,"IDRs",bounds_label.split('_&_')[0],val_type)
                                         val_oth=SeqProp.get_values(seq_id,"IDRs",bounds_label.split('_&_')[1],val_type)
-                                        Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["IDRs"][bounds_label][val_type]=str(val_oth/val_ref)
+                                        Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["IDRs"][bounds_label][val_type]=str(val_oth-val_ref)
 
                             # Here I should only compare IDRS that correspond to NFDs
                             # This means for every couple of NFDs, check that they each correspond to an IDR
