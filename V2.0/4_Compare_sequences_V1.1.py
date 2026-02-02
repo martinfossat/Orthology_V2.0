@@ -149,8 +149,6 @@ if __name__=="__main__":
                 # dimension for each ortholog
                 for orth_ref_id in Orthology_all[orths][ref_org]:
                     Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id]={}
-                    if orth_id!='ENSMUSG00000032718':
-                        continue
                      # These are version of the saem gene (i.e. alleles)
                     for seq_id in Orthology_all[orths][orga][orth_id]:
                         if seq_id=='name':
