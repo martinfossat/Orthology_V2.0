@@ -151,6 +151,8 @@ if __name__=="__main__":
                 for orth_ref_id in Orthology_all[orths][ref_org]:
                     print(orga,orth_id,orth_ref_id,len(Orthology_all[orths][orga][orth_id].keys()),len(Orthology_all[orths][ref_org][orth_ref_id].keys()))
                     Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id]={}
+                    if orth_id!='ENSMUSG00000032718':
+                        continue
                      # These are version of the saem gene (i.e. alleles)
                     for seq_id in Orthology_all[orths][orga][orth_id]:
                         if seq_id=='name':
@@ -200,6 +202,7 @@ if __name__=="__main__":
                             bounds_dis,bounds_labels_dis=SeqProp.get_bounds(seq_id,"IDRs")
 
                             for m in range(len(bounds_not_folded)):
+
                                 seq_ref=seq_ref_raw[bounds_not_folded_ref[m,0]:bounds_not_folded_ref[m,1]]
                                 seq_oth=seq_raw[bounds_not_folded[m,0]:bounds_not_folded[m,1]]
 

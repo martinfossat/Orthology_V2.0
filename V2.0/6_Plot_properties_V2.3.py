@@ -14,11 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import argparse
-
-
 #File was renamed from 4_Get_homology_scores_V1.5.py
-
-
 
 def plot_homology_scores(save_homo,prefix):
     plot_mean=np.zeros((len(region_types),len(species)))
@@ -43,6 +39,7 @@ def plot_homology_scores(save_homo,prefix):
                 temp_all_mean=np.array(save_homo['all'][specie][name])
 
                 # Getting rid of the nan, in both arrays
+
                 nans_bool=np.invert(np.isnan(temp_ens_mean))
                 temp_ens_mean=temp_ens_mean[nans_bool]
                 temp_all_mean=temp_all_mean[nans_bool]
@@ -206,10 +203,8 @@ if __name__=="__main__":
                     # This is the number of region of this type in this particular allele homology (i.e.)
                     for num_reg in homologies[ref_org][orga][orth_homo_id][prot_homo_ids][region_type]:
 
-                        print(homologies[ref_org][orga][orth_homo_id][prot_homo_ids][region_type][num_reg].keys())
-                        print(homologies[ref_org][orga][orth_homo_id][prot_homo_ids][region_type][num_reg]['Homology'])
-
-                        temp_reg+=[float(homologies[ref_org][orga][orth_homo_id][prot_homo_ids][region_type][num_reg]['Homology'])]
+                        temp_reg+=[float(homologies[ref_org][orga][orth_homo_id][prot_homo_ids][region_type][num_reg]['Homology_ratio'])]
+                        print()
                     # Average over overlapping regions of same region types
                     all_alleles[alle_ref]+=[np.mean(temp_reg)]
                 # For each reference allele, there is a number of other alleles
@@ -221,15 +216,17 @@ if __name__=="__main__":
                     save_homo[region_type][orga][orth_ref]['scores']+=[np.mean(np.sort(np.array(temp_alleles))[min(top_ind,len(temp_alleles)-1):])]
                     save_homo[region_type][orga][orth_ref]['ids']+=[orth_comp]
 
-    #This file has the scores for each region type, orga and reference ortholog
-    with open(ref_orga+'_homology_per_ortholog.json','w') as f:
-        json.dump(save_homo,f)
+    # #This file has the scores for each region type, orga and reference ortholog
+    # with open(ref_orga+'_homology_per_ortholog.json','w') as f:
+    #     json.dump(save_homo,f)
 
     binwidth=0.05
 
     colors=[plt.cm.gist_rainbow(i/(len(species))) for i in range(len(species))]
     colors_ens=['g','r','orange']
-
+    print()
+    print(save_homo)
+    print("AAAA")
     plot_homology_scores(save_homo,'All_')
     type_ensemble=['Rg_ratio','Re_ratio','As_ratio','Nu_ratio','Pref_ratio','N_ratio']
 
