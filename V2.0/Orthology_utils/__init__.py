@@ -79,8 +79,10 @@ class Seq_Prop_Manager:
             SUM=0
         self.SeqProp[seq_id]["all"]["0_"+str(len(seq))]["pct_folded"]=str(100*SUM/len(seq))
     def get_values(self,seq_id,label,bounds_label,val_type):
-
-        return float(self.SeqProp[seq_id][label][bounds_label][val_type])
+        if not val_type in self.SeqProp[seq_id][label][bounds_label]:
+            return float('NaN')
+        else :
+            return float(self.SeqProp[seq_id][label][bounds_label][val_type])
 def find_matching_folded_domains(bounds,bounds_ref,seq_oth,seq_ref,length_max_ratio=0.8,homology_min=0.4):
     bound_match=[]
     match_score=[]
@@ -98,11 +100,19 @@ def find_matching_folded_domains(bounds,bounds_ref,seq_oth,seq_ref,length_max_ra
                 if normed_homo>homology_min:
                     bound_match+=[str(bounds_ref[j,0])+'_'+str(bounds_ref[j,1])+'_&_'+str(bounds[i,0])+'_'+str(bounds[i,1])]
                     match_score+=[[homo,normed_homo]]
+
                     bounds_all_ref+=[[bounds_ref[j,0],bounds_ref[j,1]]]
                     bonds_all_oth+=[[bounds[i,0],bounds[i,1]]]
 
     bounds_not_folded_ref=get_bounds_inverted(bounds_all_ref,seq_ref)
     bounds_not_folded=get_bounds_inverted(bonds_all_oth,seq_oth)
+    # This is a correction : if the first residue is 0 in one and not the other, there is a disodered domain mismatch
+    # which must be removed
+    if (bounds_not_folded_ref[0,0]==0 and not bounds_not_folded[0,0]==0):
+        bounds_not_folded_ref=np.array([bounds_not_folded_ref[i] for i in range(1,len(bounds_not_folded_ref[i]))])
+    elif (bounds_not_folded[0,0]==0 and not bounds_not_folded_ref[0,0]==0):
+        bounds_not_folded=np.array([bounds_not_folded[i] for i in range(1,len(bounds_not_folded[i]))])
+
     return bound_match,match_score,bounds_not_folded,bounds_not_folded_ref
 
 def get_homology_score(seq_ref,seq,local):
