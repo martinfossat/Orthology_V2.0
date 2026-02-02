@@ -200,11 +200,9 @@ if __name__=="__main__":
 
                             bounds_dis_ref,bounds_labels_dis_ref=SeqProp.get_bounds(ref_id,"IDRs")
                             bounds_dis,bounds_labels_dis=SeqProp.get_bounds(seq_id,"IDRs")
-                            print(bounds_not_folded)
-                            print(bounds_not_folded_ref)
+
                             for m in range(len(bounds_not_folded)):
-                                print(seq_ref_raw,seq_raw)
-                                print(bounds_not_folded[m])
+
                                 seq_ref=seq_ref_raw[bounds_not_folded_ref[m,0]:bounds_not_folded_ref[m,1]]
                                 seq_oth=seq_raw[bounds_not_folded[m,0]:bounds_not_folded[m,1]]
 
