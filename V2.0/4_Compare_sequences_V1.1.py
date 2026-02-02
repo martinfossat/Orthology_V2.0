@@ -135,7 +135,6 @@ if __name__=="__main__":
     # labels=["all","IDRs","FDs"]
 
     for orths in Orthology_all:
-        print(orths)
         # I should make an orthology score matrix here
         # I need a reference organism, which will carry the scores for the others
         # They will be in order
@@ -149,7 +148,6 @@ if __name__=="__main__":
                     continue
                 # dimension for each ortholog
                 for orth_ref_id in Orthology_all[orths][ref_org]:
-                    print(orga,orth_id,orth_ref_id,len(Orthology_all[orths][orga][orth_id].keys()),len(Orthology_all[orths][ref_org][orth_ref_id].keys()))
                     Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id]={}
                     if orth_id!='ENSMUSG00000032718':
                         continue
@@ -220,7 +218,6 @@ if __name__=="__main__":
                                         val_ref=SeqProp.get_values(ref_id,"IDRs",bounds_label.split('_&_')[0],val_type)
                                         val_oth=SeqProp.get_values(seq_id,"IDRs",bounds_label.split('_&_')[1],val_type)
                                         Sequence_homology_all[ref_org][orga][orth_ref_id+'_'+orth_id][ref_id+'_'+seq_id]["IDRs"][bounds_label][val_type]=str(val_oth-val_ref)
-
                             # Here I should only compare IDRS that correspond to NFDs
                             # This means for every couple of NFDs, check that they each correspond to an IDR
                             # If they do, save the ratio fo the ensemble predictions into the homology json
