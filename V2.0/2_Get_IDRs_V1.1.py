@@ -9,26 +9,31 @@ import Orthology_utils as OU
 if __name__=="__main__":
     ################## Parser declaration ######################
     parser = argparse.ArgumentParser(description="""Gets the predicted IDR regions, and predict their ensemble properties""")
-    parser.add_argument("--file_name","-f",help='Name of the file containing the name of the genes in the "original" species in the first column, other columns are ignored.')
-    parser.add_argument("--output_file_name","-of",help='Name of the outputfile. Default is Gene_names.txt')
+    parser.add_argument("--orthology_file","-of",help='Name of the orthology file')
+    parser.add_argument("--properties_file","-pf",help='Name of the sequence properties file. Default is Sequence_properties.json')
+    parser.add_argument("--sequences_file", "-sf",help='Name of the sequences database json output file. Default is Sequences.json')
     # parser.add_argument("--original_specie","-os",help="Original specie")
     # parser.add_argument("--additional_species","-as",help="Additional species",default=[],nargs='+')
     # parser.add_argument("--delete_x","-dx",help="Replace symbol X in proteins sequences by an emtpy character")
     # parser.add_argument("--delete_u","-du",help="Replace symbol U in proteins sequences by an emtpy character")
     # parser.add_argument("--delete_any","-da",help="Replace symbol * in proteins sequences by an emtpy character")
-    # parser.add_argument("--max_size_factor","-msf",help="Factor for the length of the otrholog array compared to the input gene list size. Must be integer, bigger number is slower, but if many orhtolog exists, may be necessary")
+    # parser.add_argument("--max_size_factor","-msf",help="Factor for the length of the ortholog array compared to the input gene list size. Must be integer, bigger number is slower, but if many orhtolog exists, may be necessary")
     args = parser.parse_args()
 
-    if args.file_name :
-        filename=args.file_name
+    if args.orthology_file :
+        orthology_file=args.orthology_file
     else :
-        print("You must specify an input file name")
-        quit(1)
+        orthology_file='Orthology.json'
 
-    if args.output_file_name :
-        output_file=args.output_file_name
+    if args.properties_file :
+        properties_file=args.properties_file
     else :
-        output_file='Sequence_properties.json'
+        properties_file='Sequence_properties.json'
+
+    if args.sequences_file :
+        sequences_file=args.sequences_file
+    else :
+        sequences_file='Sequences.json'
 
     # if args.delete_x :
     #     try :
@@ -68,10 +73,10 @@ if __name__=="__main__":
     dictionary_organisms_gprofiler_inv=dict(zip(dictionary_organisms_gprofiler.values(), dictionary_organisms_gprofiler.keys()))
 
     # Opening JSON file
-    f=open(filename)
+    f=open(orthology_file)
     Orthology_all=json.load(f)
 
-    f=open('Sequences.json')
+    f=open(sequences_file)
     Sequences_all=json.load(f)
 
     Seq_Prop={}
@@ -105,5 +110,5 @@ if __name__=="__main__":
                         label_bounds=str(bounds[0])+'_'+str(bounds[1])
                         Seq_Prop[seq_id]['FDs'][label_bounds]={}
 
-        with open(output_file,'w') as f:
+        with open(properties_file,'w') as f:
             json.dump(Seq_Prop,f)

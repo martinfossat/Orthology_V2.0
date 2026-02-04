@@ -1,8 +1,6 @@
-
 from sparrow.predictors import batch_predict
 import json
 import matplotlib
-import Fossat_utils as FU
 import qcan_utils as QC
 import os
 matplotlib.use("pgf")
@@ -19,11 +17,6 @@ import argparse
 import numpy as np
 import Orthology_utils as OU
 
-def clean_seq(seq) :
-    seq = seq.replace('*', '')
-    seq = seq.replace('U', '')
-    seq = seq.replace('X', '')
-    return seq
 
 if __name__=="__main__":
     ################## Parser declaration ######################
@@ -32,21 +25,25 @@ if __name__=="__main__":
     homology comparison, in other steps. Additional species may be given, but those two first are required.\n
     Species name must follow the id in gProfiler (https://biit.cs.ut.ee/gprofiler/page/organism-list).\n
     The output is a file containing the gene name and gene IDs for all species, and that is required to use subsequent programs.""")
-    parser.add_argument("--file_orthologs","-fo",help='File name where the file is a json file containing created by the Ortholog program')
-    parser.add_argument("--file_IDRs","-fi",help='File name where the file is a json file containing created by the Get_IDR program, contaning IDR domain boundaries')
-    parser.add_argument("--max_size_factor","-msf",help="Factor for the length of the ortholog array compared to the input gene list size. Must be integer, bigger number is slower, but if many orhtolog exists, may be necessary")
-    parser.add_argument("--delete_cross_refs","-dcr",help="Whether gene name that share an ortholog should be delete, so they don't appear twice.  1 is delete, 0 is keep.")
+    parser.add_argument("--orthology_file","-of",help='File name where the file is a json file containing created by the Ortholog program')
+    parser.add_argument("--sequences_file", "-sf",help='Name of the sequences database json output file. Default is Sequences.json')
+    parser.add_argument("--properties_file", "-pf",help='Name of the sequence properties file. Default is Sequence_properties.json')
     args = parser.parse_args()
 
-    if args.file_orthologs :
-        filename=args.file_orthologs
+    if args.orthology_file :
+        filename=args.orthology_file
     else :
-        filename='Gene_orthology.json'
+        filename='Orthology.json'
 
-    if args.file_IDRs :
-        filename_IDRs=args.file_IDRs
+    if args.properties_file :
+        properties_file=args.properties_file
     else :
-        filename_IDRs='Sequence_properties.json'
+        properties_file='Sequence_properties.json'
+
+    if args.sequences_file :
+        sequences_file=args.sequences_file
+    else :
+        sequences_file='Sequences.json'
 
     file_path=os.path.realpath(__file__)
     with open(os.path.dirname(file_path)+"/g_Profiler_Organisms_names_dic.json", "r") as fp:
@@ -57,9 +54,9 @@ if __name__=="__main__":
     f=open(filename)
     Orthology_all=json.load(f)
 
-    SeqProp=OU.Seq_Prop_Manager(filename_IDRs)
+    SeqProp=OU.Seq_Prop_Manager(properties_file)
 
-    f=open('Sequences.json')
+    f=open(sequences_file)
     Sequences_all=json.load(f)
 
     # MEDOC part
@@ -77,7 +74,6 @@ if __name__=="__main__":
     labels=["all","IDRs","FDs"]
 
     for orths in Orthology_all:
-
         # I should make an orthology score matrix here
         # I need a reference organism, which will carry the scores for the others
         # They will be in order
@@ -93,7 +89,7 @@ if __name__=="__main__":
                         continue
                     seq_raw=Sequences_all[seq_id]
                     if clean_sequence :
-                        seq_raw=clean_seq(seq_raw)
+                        seq_raw=OU.clean_seq(seq_raw)
                     for label in labels:
                         bounds,bounds_labels=SeqProp.get_bounds(seq_id,label)
                         for i in range(len(bounds)):

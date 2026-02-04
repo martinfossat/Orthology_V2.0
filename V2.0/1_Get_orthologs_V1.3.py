@@ -32,10 +32,8 @@ def query_profiler(organism_org,organism_target,gene_name,max_wait=30):
 
 server = "https://rest.ensembl.org/"
 
-Orthology_all=np.array([])
+# Orthology_all=np.array([])
 
-# So now we needs to define the reference organism
-organism_ref=[]
 if __name__=="__main__":
     ################## Parser declaration ######################
     parser = argparse.ArgumentParser(description="""Checks the orthologs of a gene name list.\n
@@ -43,26 +41,37 @@ if __name__=="__main__":
     homology comparison, in other steps. Additional species may be given, but those two first are required.\n
     Species name must follow the id in gProfiler (https://biit.cs.ut.ee/gprofiler/page/organism-list).\n
     The output is a file containing the gene name and gene IDs for all species, and that is required to use subsequent programs.""")
-    parser.add_argument("--file_name","-f",help='Name of test file containing the name of the genes in the "original" species in the first column, other columns are ignored.')
+    parser.add_argument("--gene_file","-f",help='Name of test file containing the name of the genes in the "original" species in the first column, other columns are ignored.')
     parser.add_argument("--original_specie","-os",help="Name of the species corresponding to the gene names provided in the input file. Must respect the naming convention in gProfiler (i.e. the id on https://biit.cs.ut.ee/gprofiler/page/organism-list )")
     parser.add_argument("--additional_species","-as",help="Additional species",default=[],nargs='+')
-    parser.add_argument("--output_file_name","-of",help='Name of the orthology database json ouput file. Default is Gene_orthology.json')
+    parser.add_argument("--orthology_file","-of",help='Name of the orthology database json output file. Default is Orthology.json')
+    parser.add_argument("--sequences_file","-sf",help='Name of the sequences database json output file. Default is Sequences.json')
+    parser.add_argument("--name_file","-nf",help='Name of the names database json output file. Default is Names.json')
     args = parser.parse_args()
 
-    if args.file_name :
-        filename=args.file_name
+    if args.gene_file :
+        filename=args.gene_file
     else :
         print("You must specify an input file name")
         quit(1)
 
-    if args.output_file_name :
-        output_file=args.output_file_name
+    if args.orthology_file :
+        orthology_file=args.orthology_file
 
     else :
-        output_file='Gene_orthology.json'
+        orthology_file='Orthology.json'
 
-    sequences_file='Sequences.json'
-    name_file='Names.json'
+    if args.sequences_file :
+        sequences_file=args.sequences_file
+
+    else :
+        sequences_file='Sequences.json'
+
+    if args.name_file :
+        name_file=args.name_file
+
+    else :
+        name_file='Names.json'
 
     if args.original_specie :
         original_organism=args.original_specie
@@ -98,8 +107,6 @@ if __name__=="__main__":
 
     raw_data=FU.read_file(filename)
     data=np.array([raw_data[i][0] for i in range(len(raw_data))])
-    # So now we needs to define the reference organism
-    organism_ref=[]
 
     save_gene_name=np.empty((len(data)*4,len(organisms_all)),dtype="<U30")
     save_gene_id =np.empty((len(data)*4,len(organisms_all)),dtype="<U30")
@@ -210,7 +217,7 @@ if __name__=="__main__":
                         Orthology_all[orths][orga][gene_id]+=[seq_id]
                         #Orthology_all[orths][orga][gene_id][seq_id]=queries_seq_list[vers]
 
-    with open(output_file,'w') as f:
+    with open(orthology_file,'w') as f:
         json.dump(Orthology_all,f)
     with open(name_file,'w') as f:
         json.dump(Names_all,f)
