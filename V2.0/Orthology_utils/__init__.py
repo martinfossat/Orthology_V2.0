@@ -163,3 +163,9 @@ def get_top_x_pct(score_list,top_fraction,names=[]):
     else:
         out_name=None
     return score_list[args_top],out_name
+
+def clean_seq(seq) :
+    seq = seq.replace('*', '')
+    seq = seq.replace('U', '')
+    seq = seq.replace('X', '')
+    return seq
