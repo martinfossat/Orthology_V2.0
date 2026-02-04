@@ -16,6 +16,7 @@ import numpy as np
 import os
 import argparse
 import Orthology_utils as OU
+
 if __name__=="__main__":
     ################## Parser declaration ######################
     parser = argparse.ArgumentParser(description="""Checks the orthologs of a gene name list.\n
@@ -23,16 +24,16 @@ if __name__=="__main__":
     homology comparison, in other steps. Additional species may be given, but those two first are required.\n
     Species name must follow the id in gProfiler (https://biit.cs.ut.ee/gprofiler/page/organism-list).\n
     The output is a file containing the gene name and gene IDs for all species, and that is required to use subsequent programs.""")
-    parser.add_argument("--homologies_file_name","-fh",help='Name of the input homologies json file. Default is Homologies.txt')
-    parser.add_argument("--orthology_file_name","-fo",help='Name of the Orthology json file. Default is Homologies.txt')
+    parser.add_argument("--homologies_file","-hf",help='Name of the homology database file. Default is Gene_homologies.json')
+    #parser.add_argument("--orthology_file","-of",help='Name of the orthology file')
+    parser.add_argument("--name_file","-nf",help='Name of the names database json output file. Default is Names.json')
     parser.add_argument("--reference_specie","-rs",help="Reference specie")
     parser.add_argument("--top_iso_fraction","-taf",help="Top fraction of isoforms that are kept using overall homology as a metric. 0 is only most homologous, 1 is all.")
     parser.add_argument("--top_ortholog_fraction","-tof",help="Top fraction of orthologs that are kept using overall homology as a metric. 0 is only most homologous, 1 is all. ")
-    # Must add the top and norm specie
     parser.add_argument("--min_len_ratio","-mlr",help="")
     parser.add_argument("--additional_species","-as",help="Additional species",default=[],nargs='+')
     args = parser.parse_args()
-    name_file='Names.json'
+
     if args.top_iso_fraction :
         try :
             top_iso_fraction=float(args.top_allele_fraction)
@@ -42,7 +43,7 @@ if __name__=="__main__":
         except :
             print("Wrong format for mof")
     else :
-        top_iso_fraction=1.0
+        top_iso_fraction=0.0
 
     if args.top_ortholog_fraction :
         try :
@@ -55,16 +56,16 @@ if __name__=="__main__":
     else :
         top_ortholog_fraction=0.0
 
-    if args.homologies_file_name :
-        filename=args.homologies_file_name
+    if args.homologies_file :
+        homologies_file=args.homologies_file
     else :
-        filename='Gene_homologies.json'
+        homologies_file='Gene_homologies.json'
 
-    if args.orthology_file_name :
-        filename_ortho=args.homologies_file_name
+    if args.name_file :
+        name_file=args.name_file
+
     else :
-        filename_ortho='Gene_orthology.json'
-
+        name_file='Names.json'
 
     if args.reference_specie :
         ref_org=args.reference_specie
@@ -90,7 +91,7 @@ if __name__=="__main__":
     pct_top_orth=top_ortholog_fraction
     #pct_top_alle=top_allele_fraction
 
-    f=open(filename)
+    f=open(homologies_file)
     save_homo=json.load(f)
     # This contains the precomputed IDR ensemble properties from ALBATROSS
     region_types=['all']#,'IDRs','FDs']
@@ -229,9 +230,6 @@ if __name__=="__main__":
     save_all_compare=save_all_compare[inds_sorted]
     save_all_compare_top=save_all_compare_top[inds_sorted]
     save_all_compare_norm=save_all_compare_norm[inds_sorted]
-
-
-
 
     W=ref_orga+'_id\t'+ref_orga+'_name\t'+specie_top+'_id\t'+specie_top+'_name\t'+specie_top+'_score\t'+specie_norm+'_id\t'+specie_norm+'_name\t'+specie_norm+'_score\t'+specie_top+'/'+specie_norm+'\n'
     for i in range(len(save_all_ids_ref)):

@@ -14,42 +14,7 @@ pgf_with_latex = {
 import matplotlib
 matplotlib.rcParams.update(pgf_with_latex)
 import argparse
-import numpy as np
 import Orthology_utils as OU
-
-def clean_seq(seq) :
-    seq = seq.replace('*', '')
-    seq = seq.replace('U', '')
-    seq = seq.replace('X', '')
-    return seq
-
-def get_self_alignement(seq_test,AA_type,AA_scores) :
-    count=0
-    for aa in range(len(AA_type)):
-        for s in range(len(seq_test)):
-            count+=(str(seq_test[s])==AA_type[aa])*AA_scores[aa]
-    return count
-
-def test_overlap(bounds,bounds_ref,fct_thr):
-    bound1=bounds[0]
-    bound2=bounds[1]
-    bound1_ref=bounds_ref[0]
-    bound2_ref=bounds_ref[1]
-
-    bool_test=(((bound1>bound1_ref and bound1<bound2_ref) or
-             (bound2>bound1_ref and bound2<bound2_ref)) or
-            ((bound1_ref>bound1 and bound1_ref<bound2) or
-             (bound2_ref>bound1 and bound2_ref<bound2)))
-
-    range=np.arange(bound1,bound2)
-    range_ref=np.arange(bound1_ref,bound2_ref)
-    full_range=np.arange(min(bound1,bound1_ref),max(bound2,bound2_ref))
-    if len(full_range)!=0:
-        fct_overlap=min(len(np.intersect1d(range,full_range)),len(np.intersect1d(range_ref,full_range)))/len(full_range)
-        bool_test=fct_thr<fct_overlap
-    else :
-        bool_test=False
-    return bool_test
 
 AA_type,AA_scores=FU.get_self_homology_score()
 if __name__=="__main__":
@@ -59,15 +24,14 @@ if __name__=="__main__":
     homology comparison, in other steps. Additional species may be given, but those two first are required.\n
     Species name must follow the id in gProfiler (https://biit.cs.ut.ee/gprofiler/page/organism-list).\n
     The output is a file containing the gene name and gene IDs for all species, and that is required to use subsequent programs.""")
-
-    parser.add_argument("--file_orthologs","-fo",help='File name of a json file containing all the orthologs')
-    parser.add_argument("--file_seq","-fs",help='File name of a json file containing sequences')
-    parser.add_argument("--file_prop","-fp",help='File name of a json file containing created by the Get_IDR program, contaning IDR domain boundaries')
-    parser.add_argument("--output_file_name","-of",help='Name of the outputfile. Default is Gene_names.txt')
-    parser.add_argument("--min_len_fraction","-mif",help='Minimum length fraction')
+    parser.add_argument("--orthology_file","-of",help='File name where the file is a json file containing created by the Ortholog program')
+    parser.add_argument("--sequences_file", "-sf",help='Name of the sequences database json output file. Default is Sequences.json')
+    parser.add_argument("--properties_file", "-pf",help='Name of the sequence properties file. Default is Sequence_properties.json')
+    parser.add_argument("--homologies_file","-hf",help='Name of the homology database file. Default is Gene_homologies.json')
+    parser.add_argument("--min_len_fraction","-mif",help='Minimum length fraction. Best to keep 0, build the database for everything, and discard later')
     parser.add_argument("--reference_specie","-rs",help="Reference specie")
     parser.add_argument("--additional_species","-as",help="Additional species",default=[],nargs='+')
-    #parser.add_argument("--max_size_factor","-msf",help="Factor for the length of the otrholog array compared to the input gene list size. Must be integer, bigger number is slower, but if many orhtolog exists, may be necessary")
+    #parser.add_argument("--max_size_factor","-msf",help="Factor for the length of the ortholog array compared to the input gene list size. Must be integer, bigger number is slower, but if many ortholog exists, may be necessary")
     #parser.add_argument("--delete_cross_refs","-dcr",help="Whether gene name that share an ortholog should be delete, so they don't appear twice.  1 is delete, 0 is keep.")
     args = parser.parse_args()
 
@@ -82,25 +46,25 @@ if __name__=="__main__":
         length_ratio=0.0
         print("No argument for mlf, defaulting to "+str(length_ratio))
 
-    if args.file_orthologs :
-        filename=args.file_orthologs
+    if args.orthology_file :
+        orthology_file=args.orthology_file
     else :
-        filename='Gene_orthology.json'
+        orthology_file='Gene_orthology.json'
 
-    if args.file_prop :
-        filename_Seq_Prop=args.file_prop
+    if args.properties_file :
+        properties_file=args.properties_file
     else :
-        filename_Seq_Prop='Sequence_properties.json'
+        properties_file='Sequence_properties.json'
 
-    if args.file_seq :
-        seq_file=args.file_seq
+    if args.sequences_file :
+        sequences_file=args.sequences_file
     else :
-        seq_file='Sequences.json'
+        sequences_file='Sequences.json'
 
-    if args.output_file_name :
-        output_file=args.output_file_name
+    if args.homologies_file :
+        homologies_file=args.homologies_file
     else :
-        output_file='Gene_homologies.json'
+        homologies_file='Gene_homologies.json'
 
     if args.reference_specie :
         ref_org=args.reference_specie
@@ -124,13 +88,13 @@ if __name__=="__main__":
 
     all_orga=[ref_org]+other_organism
 
-    f=open(filename)
+    f=open(orthology_file)
     Orthology_all=json.load(f)
 
-    f=open(seq_file)
+    f=open(sequences_file)
     Sequences_all=json.load(f)
     local=True
-    SeqProp=OU.Seq_Prop_Manager(filename_Seq_Prop)
+    SeqProp=OU.Seq_Prop_Manager(properties_file)
     Sequence_homology_all={}
 
     Sequence_homology_all[ref_org]={oth:{} for oth in all_orga}
@@ -171,7 +135,7 @@ if __name__=="__main__":
                     
                         seq_ref_raw=Sequences_all[ref_id]
                         if clean_sequence:
-                            seq_ref_raw=clean_seq(seq_ref_raw)
+                            seq_ref_raw=OU.clean_seq(seq_ref_raw)
                         
                         for seq_id in Orthology_all[orths][orga][orth_id]:
                             if seq_id=='name':
@@ -180,7 +144,7 @@ if __name__=="__main__":
                                 Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]={}
                             seq_raw=Sequences_all[seq_id]
                             if clean_sequence:
-                                seq_raw=clean_seq(seq_raw)
+                                seq_raw=OU.clean_seq(seq_raw)
 
                             if min(len(seq_ref_raw),len(seq_raw))/max(len(seq_ref_raw),len(seq_raw))<length_ratio :
                                 continue
@@ -239,5 +203,5 @@ if __name__=="__main__":
                             # If they do, save the ratio fo the ensemble predictions into the homology json
                             # From here on, we will recombine the IDRs
 
-    with open(output_file,'w') as f:
+    with open(homologies_file,'w') as f:
         json.dump(Sequence_homology_all,f)
