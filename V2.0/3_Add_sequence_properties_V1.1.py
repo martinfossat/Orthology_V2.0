@@ -57,8 +57,10 @@ if __name__=="__main__":
     f=open(filename)
     Orthology_all=json.load(f)
 
-    f=open(filename_IDRs)
     SeqProp=OU.Seq_Prop_Manager(filename_IDRs)
+
+    f=open('Sequences.json')
+    Sequences_all=json.load(f)
 
     # MEDOC part
     pH_range=[0,14]
@@ -72,8 +74,6 @@ if __name__=="__main__":
     force_prediction=True
 
     local=True
-
-
     labels=["all","IDRs","FDs"]
 
     for orths in Orthology_all:
@@ -87,11 +87,11 @@ if __name__=="__main__":
         for orga in Orthology_all[orths]:
             #  dimension for each orga
             for orth_id in Orthology_all[orths][orga]:
-                # These are version of the saem gene (i.e. alleles)
+                # These are version of the saem gene (i.e. isoforms)
                 for seq_id in Orthology_all[orths][orga][orth_id]:
                     if seq_id=='name':
                         continue
-                    seq_raw=Orthology_all[orths][orga][orth_id][seq_id]
+                    seq_raw=Sequences_all[seq_id]
                     if clean_sequence :
                         seq_raw=clean_seq(seq_raw)
                     for label in labels:

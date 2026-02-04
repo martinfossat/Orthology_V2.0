@@ -1,5 +1,4 @@
 import json
-
 import Fossat_utils as FU
 import matplotlib
 matplotlib.use("pgf")
@@ -16,7 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import argparse
-
+import Orthology_utils as OU
 if __name__=="__main__":
     ################## Parser declaration ######################
     parser = argparse.ArgumentParser(description="""Checks the orthologs of a gene name list.\n
@@ -24,23 +23,26 @@ if __name__=="__main__":
     homology comparison, in other steps. Additional species may be given, but those two first are required.\n
     Species name must follow the id in gProfiler (https://biit.cs.ut.ee/gprofiler/page/organism-list).\n
     The output is a file containing the gene name and gene IDs for all species, and that is required to use subsequent programs.""")
-    parser.add_argument("--homologies_file_name","-f",help='Name of the input homologies json file. Default is Homologies.txt')
+    parser.add_argument("--homologies_file_name","-fh",help='Name of the input homologies json file. Default is Homologies.txt')
+    parser.add_argument("--orthology_file_name","-fo",help='Name of the Orthology json file. Default is Homologies.txt')
     parser.add_argument("--reference_specie","-rs",help="Reference specie")
-    parser.add_argument("--top_allele_fraction","-taf",help="Top fraction of alleles that are kept using overall homology as a metric. 0 is only most homologous, 1 is all. ")
+    parser.add_argument("--top_iso_fraction","-taf",help="Top fraction of isoforms that are kept using overall homology as a metric. 0 is only most homologous, 1 is all.")
     parser.add_argument("--top_ortholog_fraction","-tof",help="Top fraction of orthologs that are kept using overall homology as a metric. 0 is only most homologous, 1 is all. ")
+    # Must add the top and norm specie
+    parser.add_argument("--min_len_ratio","-mlr",help="")
     parser.add_argument("--additional_species","-as",help="Additional species",default=[],nargs='+')
     args = parser.parse_args()
-
-    if args.top_allele_fraction :
+    name_file='Names.json'
+    if args.top_iso_fraction :
         try :
-            top_allele_fraction=float(args.top_allele_fraction)
-            if top_allele_fraction<0 or top_allele_fraction>1.:
+            top_iso_fraction=float(args.top_allele_fraction)
+            if top_iso_fraction<0 or top_iso_fraction>1.:
                 print("Wrong value for top_allele_fraction. Please use a number between 0 and 1")
                 quit()
         except :
             print("Wrong format for mof")
     else :
-        top_allele_fraction=1.0
+        top_iso_fraction=1.0
 
     if args.top_ortholog_fraction :
         try :
@@ -57,6 +59,12 @@ if __name__=="__main__":
         filename=args.homologies_file_name
     else :
         filename='Gene_homologies.json'
+
+    if args.orthology_file_name :
+        filename_ortho=args.homologies_file_name
+    else :
+        filename_ortho='Gene_orthology.json'
+
 
     if args.reference_specie :
         ref_org=args.reference_specie
@@ -81,12 +89,11 @@ if __name__=="__main__":
 
     pct_top_orth=top_ortholog_fraction
     #pct_top_alle=top_allele_fraction
-    #input("Left to do : 1 make the comparison of sapiens to itself, 2 get the top x pct")
-    filename=ref_orga + '_homology_per_ortholog.json'
+
     f=open(filename)
     save_homo=json.load(f)
     # This contains the precomputed IDR ensemble properties from ALBATROSS
-    region_types=['all','IDRs','FDs']
+    region_types=['all']#,'IDRs','FDs']
     # I need to save the top of each score as a function of the top of all other scores
     # What I can do is keep the scores in lists with the same index.
     specie_norm='mmusculus'
@@ -96,46 +103,70 @@ if __name__=="__main__":
     save_all_compare=[]
     save_all_ids_ref=[]
     save_all_ids_top = []
-
     save_all_ids_norm = []
+
     save_all_compare_norm=[]
     save_all_compare_top = []
     if pct_top_orth !=0. :
         print("This is not currently possible")
         exit()
 
-    for orth_ref in save_homo['all'][specie_top]:
-        if not orth_ref in save_homo['all'][specie_norm].keys():
-            continue
+    for label in region_types:
+        for orth_ref in save_homo[ref_orga][specie_top]:
+            if not orth_ref in save_homo[ref_orga][specie_norm].keys():
+                # Skip if an orhtolog exist in only one of the species that we are comparing
+                continue
+            save_temp_top=[]
+            save_temp_norm=[]
+            #Norm
+            # For each orthologs, find all the scores for the top and norm species.
+            save_temp_ids_top=[]
+            save_temp_ids_norm=[]
+            for orth in save_homo[ref_orga][specie_top][orth_ref]:
+                temp_top=[]
+                for prot_ref in save_homo[ref_orga][specie_top][orth_ref][orth]:
+                    for prot in save_homo[ref_orga][specie_top][orth_ref][orth][prot_ref]:
+                        temp_region=[]
+                        names_iso_temp=[]
+                        for region in save_homo[ref_orga][specie_top][orth_ref][orth][prot_ref][prot][label]:
+                            temp_region+=[float(save_homo[ref_orga][specie_top][orth_ref][orth][prot_ref][prot][label][region]['Homology_ratio'])]
+                        if len(temp_region)!=0:
+                            temp_top+=[np.mean(temp_region)]
+                save_temp_top+=[np.mean(OU.get_top_x_pct(temp_top,top_iso_fraction)[0])]
+                save_temp_ids_top+=[orth]
 
-        nans_bool = np.invert(np.isnan(save_homo['all'][specie_top][orth_ref]['scores']))
-        temp_orth_top = np.array(save_homo['all'][specie_top][orth_ref]['scores'])[nans_bool]
-        top_ind_top = int(np.ceil(len(temp_orth_top) * (1 - pct_top_orth)))
-        args_top=np.argsort(save_homo['all'][specie_top][orth_ref]['scores'])[min(top_ind_top,len(temp_orth_top)-1):]
+            # For each orthologs, find all the scores for the top and norm species.
+            for orth in save_homo[ref_orga][specie_norm][orth_ref]:
+                temp_top=[]
+                for prot_ref in save_homo[ref_orga][specie_norm][orth_ref][orth]:
+                    for prot in save_homo[ref_orga][specie_norm][orth_ref][orth][prot_ref]:
+                        temp_region=[]
+                        for region in save_homo[ref_orga][specie_norm][orth_ref][orth][prot_ref][prot][label]:
+                            temp_region+=[float(save_homo[ref_orga][specie_norm][orth_ref][orth][prot_ref][prot][label][region]['Homology_ratio'])]
+                        if len(temp_region)!=0:
+                            temp_top+=[np.mean(temp_region)]
 
-        nans_bool = np.invert(np.isnan(save_homo['all'][specie_norm][orth_ref]['scores']))
-        temp_orth_norm = np.array(save_homo['all'][specie_norm][orth_ref]['scores'])[nans_bool]
-        top_ind_norm = int(np.ceil(len(temp_orth_norm) * (1 - pct_top_orth)))
-        args_norm = np.argsort(save_homo['all'][specie_norm][orth_ref]['scores'])[min(top_ind_norm, len(temp_orth_norm) - 1):]
+                save_temp_norm+=[np.mean(OU.get_top_x_pct(temp_top,top_iso_fraction)[0])]
+                save_temp_ids_norm+=[orth]
 
-        if len(args_top)==0 or len(args_norm)==0:
-            continue
+            save_temp_top,best_top_id=OU.get_top_x_pct(save_temp_top,top_ortholog_fraction,names=save_temp_ids_top)
+            save_temp_norm,best_norm_id=OU.get_top_x_pct(save_temp_norm,top_ortholog_fraction,names=save_temp_ids_norm)
 
-        try :
+            # Now I need to get the IDs of the best allele, best orthologs, for each ortholog
+
+            save_all_ids_top+=[best_top_id]
+            save_all_ids_norm+=[best_norm_id]
             save_all_ids_ref+=[orth_ref]
-            save_all_ids_top+=[np.array(save_homo['all'][specie_top][orth_ref]['ids'])[args_top][0]]
-            save_all_ids_norm+=[np.array(save_homo['all'][specie_norm][orth_ref]['ids'])[args_norm][0]]
-        except :
-            print('Here')
-            print(args_norm==[])
-            print(args_top)
-            print(args_norm)
-            print(np.array(save_homo['all'][specie_top][orth_ref]['ids'])[args_top])
-            input()
+            save_all_compare+=[np.mean(save_temp_top)/np.mean(save_temp_norm)]
+            save_all_compare_top+=[np.mean(save_temp_top)]
+            save_all_compare_norm+=[np.mean(save_temp_norm)]
 
-        save_all_compare+=[np.mean(np.array(save_homo['all'][specie_top][orth_ref]['scores'])[args_top])/np.mean(np.array(save_homo['all'][specie_norm][orth_ref]['scores'])[args_norm])]
-        save_all_compare_top+=[np.mean(np.array(save_homo['all'][specie_top][orth_ref]['scores'])[args_top])]
-        save_all_compare_norm+=[np.mean(np.array(save_homo['all'][specie_norm][orth_ref]['scores'])[args_norm])]
+    save_all_ids_ref=np.array(save_all_ids_ref)
+    save_all_ids_top=np.array(save_all_ids_top)
+    save_all_ids_norm=np.array(save_all_ids_norm)
+    save_all_compare=np.array(save_all_compare)
+    save_all_compare_top= np.array(save_all_compare_top)
+    save_all_compare_norm= np.array(save_all_compare_norm)
 
 
     plt.figure('2D_hist_norm',figsize=(4,4))
@@ -150,7 +181,7 @@ if __name__=="__main__":
     hist=np.histogram2d(save_all_compare,save_all_compare_norm,bins=[bins_x,bins_y])[0]
 
     plt.yticks(x_ticks,x_ticks)
-    plt.xticks(y_ticks, y_ticks)
+    plt.xticks(y_ticks,y_ticks)
 
     plt.ylabel('Normalized homology ratio ('+specie_top+'/'+specie_norm+')')
     plt.xlabel('Normalized homology ratio '+specie_norm+' to '+ref_org)
@@ -187,20 +218,24 @@ if __name__=="__main__":
     plt.savefig('2D_hist_2_species.pdf')
     plt.close()
 
-    save_all_ids=np.array(save_all_ids_ref)
-    save_all_compare=np.array(save_all_compare)
-    save_all_compare_top= np.array(save_all_compare_top)
-    save_all_compare_norm= np.array(save_all_compare_norm)
+
+    f=open(name_file)
+    save_names=json.load(f)
 
     inds_sorted=np.argsort(save_all_compare)
-    save_all_ids=save_all_ids[inds_sorted]
+    save_all_ids_ref=save_all_ids_ref[inds_sorted]
+    save_all_ids_top=save_all_ids_top[inds_sorted]
+    save_all_ids_norm=save_all_ids_norm[inds_sorted]
     save_all_compare=save_all_compare[inds_sorted]
     save_all_compare_top=save_all_compare_top[inds_sorted]
     save_all_compare_norm=save_all_compare_norm[inds_sorted]
 
-    W='IDs_ref\tdrerio_id\tdrerio_score\tmmusculus_id\tmmusculus_score\tdrerio/mmusculus\n'
-    for i in range(len(save_all_ids)):
-        W+=str(save_all_ids_ref[i])+'\t'+str(save_all_ids_top[i])+'\t'+str(save_all_compare_top[i])+'\t'+str(save_all_ids_norm[i])+'\t'+str(save_all_compare_norm[i])+'\t'+str(save_all_compare[i])+'\n'
+
+
+
+    W=ref_orga+'_id\t'+ref_orga+'_name\t'+specie_top+'_id\t'+specie_top+'_name\t'+specie_top+'_score\t'+specie_norm+'_id\t'+specie_norm+'_name\t'+specie_norm+'_score\t'+specie_top+'/'+specie_norm+'\n'
+    for i in range(len(save_all_ids_ref)):
+        W+=str(save_all_ids_ref[i])+'\t'+str(save_names[save_all_ids_ref[i]])+'\t'+str(save_all_ids_top[i])+'\t'+str(save_names[save_all_ids_top[i]])+'\t'+str(save_all_compare_top[i])+'\t'+str(save_all_ids_norm[i])+'\t'+str(save_names[save_all_ids_norm[i]])+'\t'+str(save_all_compare_norm[i])+'\t'+str(save_all_compare[i])+'\n'
 
     FU.write_file('Sorted_ids.txt',W)
 

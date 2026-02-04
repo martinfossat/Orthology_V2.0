@@ -43,12 +43,10 @@ if __name__=="__main__":
     homology comparison, in other steps. Additional species may be given, but those two first are required.\n
     Species name must follow the id in gProfiler (https://biit.cs.ut.ee/gprofiler/page/organism-list).\n
     The output is a file containing the gene name and gene IDs for all species, and that is required to use subsequent programs.""")
-    parser.add_argument("--file_name","-f",help='File name containing the name of the genes in the "original" species in the first column, other columns are ignored.')
-    parser.add_argument("--output_file_name","-of",help='Name of the outputfile. Default is Gene_names.txt')
-    parser.add_argument("--original_specie","-os",help="Original specie")
+    parser.add_argument("--file_name","-f",help='Name of test file containing the name of the genes in the "original" species in the first column, other columns are ignored.')
+    parser.add_argument("--original_specie","-os",help="Name of the species corresponding to the gene names provided in the input file. Must respect the naming convention in gProfiler (i.e. the id on https://biit.cs.ut.ee/gprofiler/page/organism-list )")
     parser.add_argument("--additional_species","-as",help="Additional species",default=[],nargs='+')
-    parser.add_argument("--max_size_factor","-msf",help="Factor for the length of the otrholog array compared to the input gene list size. Must be integer, bigger number is slower, but if many orhtolog exists, may be necessary")
-    parser.add_argument("--delete_cross_refs","-dcr",help="Whether gene name that share an ortholog should be delete, so they don't appear twice.  1 is delete, 0 is keep.")
+    parser.add_argument("--output_file_name","-of",help='Name of the orthology database json ouput file. Default is Gene_orthology.json')
     args = parser.parse_args()
 
     if args.file_name :
@@ -64,7 +62,7 @@ if __name__=="__main__":
         output_file='Gene_orthology.json'
 
     sequences_file='Sequences.json'
-
+    name_file='Names.json'
 
     if args.original_specie :
         original_organism=args.original_specie
@@ -113,7 +111,8 @@ if __name__=="__main__":
     last_line_change=0
     save_prev_name=''
     save_prev_id=''
-    # The goal now would be to save all of the
+
+    Names_all={}
     Orthology_all={}
     def get_all_ids(json_data):
         ids=[]
@@ -149,16 +148,16 @@ if __name__=="__main__":
                 ind=ind_org
                 Orthology_all[name_org]={}
                 Orthology_all[name_org][organisms_all[ind]]={}
-                Orthology_all[name_org][organisms_all[ind]][id_org]={}
-                Orthology_all[name_org][organisms_all[ind]][id_org]['name']=name_org
-
+                Orthology_all[name_org][organisms_all[ind]][id_org]=[]
+                #Orthology_all[name_org][organisms_all[ind]][id_org]['name']=name_org
+                Names_all[id_org]=name_org
             # If that organism in that gene does not exist yet
             if organisms_all[t] not in Orthology_all[name_org] :
                 Orthology_all[name_org][organisms_all[t]]={}
-            Orthology_all[name_org][organisms_all[t]][id_new]={}
-            Orthology_all[name_org][organisms_all[t]][id_new]['name']=name_new
+            Orthology_all[name_org][organisms_all[t]][id_new]=[]
+            #Orthology_all[name_org][organisms_all[t]][id_new]['name']=name_new
+            Names_all[id_new]=name_new
 
-    Sequences={}
     # Ok now we have all the orthologs, and we can check the sequences
     # For that we first get all gene ids, and we then ask the server, then we assign the protein in the json
     # This is to have only one query,and thus limit server usage
@@ -184,7 +183,7 @@ if __name__=="__main__":
         if type(seqs_ref)!=type([]):
             continue
 
-        # Now to find efficiently the location of the each of the output sequence
+        # Now to find efficiently the location of each of the output sequence
         # For this I can construct an array of tuples, where the tuple is the location of the
         for i in range(len(seqs_ref)):
             queries_gene_id_list += [seqs_ref[i]['query']]
@@ -194,6 +193,9 @@ if __name__=="__main__":
     queries_gene_id_list=np.array(queries_gene_id_list)
     queries_seq_list=np.array(queries_seq_list)
     queries_seq_id_list=np.array(queries_seq_id_list)
+
+    Sequences_all={}
+
     # Loop across gene names
     for orths in Orthology_all:
         # Loop across organisms
@@ -204,7 +206,14 @@ if __name__=="__main__":
                     inds=out[:,0]
                     for vers in inds :
                         seq_id=queries_seq_id_list[vers]
-                        Orthology_all[orths][orga][gene_id][seq_id]=queries_seq_list[vers]
+                        Sequences_all[seq_id]=queries_seq_list[vers]
+                        Orthology_all[orths][orga][gene_id]+=[seq_id]
+                        #Orthology_all[orths][orga][gene_id][seq_id]=queries_seq_list[vers]
 
     with open(output_file,'w') as f:
         json.dump(Orthology_all,f)
+    with open(name_file,'w') as f:
+        json.dump(Names_all,f)
+    with open(sequences_file,'w') as f:
+        json.dump(Sequences_all,f)
+
