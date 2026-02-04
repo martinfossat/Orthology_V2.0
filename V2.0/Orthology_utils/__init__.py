@@ -88,7 +88,7 @@ def find_matching_folded_domains(bounds,bounds_ref,seq_oth,seq_ref,length_max_ra
     bound_match=[]
     match_score=[]
     bounds_all_ref=[]
-    bonds_all_oth=[]
+    bounds_all_oth=[]
     for i in range(len(bounds)):
         for j in range(len(bounds_ref)):
             len_ref=bounds_ref[j,1]-bounds_ref[j,0]
@@ -103,17 +103,33 @@ def find_matching_folded_domains(bounds,bounds_ref,seq_oth,seq_ref,length_max_ra
                     match_score+=[[homo,normed_homo]]
 
                     bounds_all_ref+=[[bounds_ref[j,0],bounds_ref[j,1]]]
-                    bonds_all_oth+=[[bounds[i,0],bounds[i,1]]]
+                    bounds_all_oth+=[[bounds[i,0],bounds[i,1]]]
 
     bounds_not_folded_ref=get_bounds_inverted(bounds_all_ref,seq_ref)
-    bounds_not_folded=get_bounds_inverted(bonds_all_oth,seq_oth)
-    # This is a correction : if the first residue is 0 in one and not the other, there is a disodered domain mismatch
+    bounds_not_folded=get_bounds_inverted(bounds_all_oth,seq_oth)
+    # if len(bounds_not_folded_ref)!=len(bounds_not_folded):
+    #     print("Problem")
+    temp_ref=[]
+    temp=[]
+    for i in range(len(bounds_not_folded_ref)):
+        if not (bounds_not_folded_ref[i,0]==bounds_not_folded_ref[i,1] or bounds_not_folded[i,0]==bounds_not_folded[i,1]):
+            temp+=[bounds_not_folded[i]]
+            temp_ref+=[bounds_not_folded_ref[i]]
+    bounds_not_folded_ref=np.array(temp_ref)
+    bounds_not_folded=np.array(temp)
+    # This is a correction : if the first residue is 0 in one and not the other, there is a disordered domain mismatch
     # which must be removed
-    if len(bounds_not_folded_ref[0])!=0:
-        if (bounds_not_folded_ref[0,0]==0 and not bounds_not_folded[0,0]==0):
-            bounds_not_folded_ref=np.array([bounds_not_folded_ref[i] for i in range(1,len(bounds_not_folded_ref[i]))])
-        elif (bounds_not_folded[0,0]==0 and not bounds_not_folded_ref[0,0]==0):
-            bounds_not_folded=np.array([bounds_not_folded[i] for i in range(1,len(bounds_not_folded[i]))])
+    # if len(bounds_not_folded_ref[0])!=0 and len(bounds_not_folded[0]!=0):
+    #     if (bounds_not_folded_ref[0,0]==0 and not bounds_not_folded[0,0]==0):
+    #         bounds_not_folded_ref=np.array([bounds_not_folded_ref[i] for i in range(1,len(bounds_not_folded_ref))])
+        # elif (bounds_not_folded[0,0]==0 and not bounds_not_folded_ref[0,0]==0):
+        #     bounds_not_folded=np.array([bounds_not_folded[i] for i in range(1,len(bounds_not_folded))])
+    # But if one of not folded is empty and not the other :
+    # That means :
+
+
+
+
 
     return bound_match,match_score,bounds_not_folded,bounds_not_folded_ref
 
@@ -139,17 +155,18 @@ AA_type,AA_scores=FU.get_self_homology_score()
 def get_bounds_inverted(bounds,seq):
     if len(bounds)==0:
         return np.array([[0,len(seq)]])
-    if bounds[0][0]==0:
-        bounds_inv=[]
-    else :
-        bounds_inv=[[0]]
+    # if bounds[0][0]==0:
+    #     # bounds_inv=[]
+    #     bounds_inv=[[0,0]]
+    # else :
+    bounds_inv=[[0]]
     for b in range(len(bounds)):
-        if bounds[b][0]!=0:
-            bounds_inv[-1]+=[bounds[b][0]]
-        if bounds[b][1]!=len(seq):
-            bounds_inv+=[[bounds[b][1]]]
-    if bounds[b][1]!=len(seq):
-        bounds_inv[-1]+=[len(seq)]
+
+        bounds_inv[-1]+=[bounds[b][0]]
+        # if bounds[b][1]!=len(seq):
+        bounds_inv+=[[bounds[b][1]]]
+    # if bounds[b][1]!=len(seq):
+    bounds_inv[-1]+=[len(seq)]
 
     return np.array(bounds_inv)
 def get_top_x_pct(score_list,top_fraction,names=[]):
