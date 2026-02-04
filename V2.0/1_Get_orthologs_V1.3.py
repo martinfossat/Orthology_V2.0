@@ -32,7 +32,7 @@ def query_profiler(organism_org,organism_target,gene_name,max_wait=30):
 
 server = "https://rest.ensembl.org/"
 
-Orthology_all=np.array([])
+# Orthology_all=np.array([])
 
 # So now we needs to define the reference organism
 organism_ref=[]
