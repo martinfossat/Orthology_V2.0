@@ -15,7 +15,6 @@ import numpy as np
 import os
 import argparse
 #File was renamed from 4_Get_homology_scores_V1.5.py
-
 def plot_homology_scores(save_homo,prefix):
     plot_mean=np.zeros((len(region_types),len(species)))
     plot_std=np.zeros((len(region_types),len(species)))
@@ -188,7 +187,7 @@ if __name__=="__main__":
                     #V2.3 change
                     save_homo[region_type][orga][orth_ref]={}
                     save_homo[region_type][orga][orth_ref]['ids']=[]
-                    save_homo[region_type][orga][orth_ref]['scores'] = []
+                    save_homo[region_type][orga][orth_ref]['scores']=[]
                 # loop over alleles combinations
                 all_alleles={}
 
@@ -204,7 +203,6 @@ if __name__=="__main__":
                     for num_reg in homologies[ref_org][orga][orth_homo_id][prot_homo_ids][region_type]:
 
                         temp_reg+=[float(homologies[ref_org][orga][orth_homo_id][prot_homo_ids][region_type][num_reg]['Homology_ratio'])]
-                        print()
                     # Average over overlapping regions of same region types
                     all_alleles[alle_ref]+=[np.mean(temp_reg)]
                 # For each reference allele, there is a number of other alleles

@@ -2,7 +2,7 @@ import json
 import qcan_utils as QC
 import Fossat_utils as FU
 import numpy as np
-from sparrow.predictors import batch_predict
+
 import skbio
 class Seq_Prop_Manager:
     def __init__(self,filename):
@@ -59,6 +59,7 @@ class Seq_Prop_Manager:
         self.SeqProp[seq_id][label][bounds_label]['Kappa']=str(kappa)
 
     def add_ensemble_properties(self,seq_id,seq,label,bounds_label):
+        from sparrow.predictors import batch_predict
         if seq_id not in self.SeqProp:
             self.SeqProp[seq_id]={label:{}}
         if label not in self.SeqProp[seq_id]:
@@ -108,10 +109,11 @@ def find_matching_folded_domains(bounds,bounds_ref,seq_oth,seq_ref,length_max_ra
     bounds_not_folded=get_bounds_inverted(bonds_all_oth,seq_oth)
     # This is a correction : if the first residue is 0 in one and not the other, there is a disodered domain mismatch
     # which must be removed
-    if (bounds_not_folded_ref[0,0]==0 and not bounds_not_folded[0,0]==0):
-        bounds_not_folded_ref=np.array([bounds_not_folded_ref[i] for i in range(1,len(bounds_not_folded_ref[i]))])
-    elif (bounds_not_folded[0,0]==0 and not bounds_not_folded_ref[0,0]==0):
-        bounds_not_folded=np.array([bounds_not_folded[i] for i in range(1,len(bounds_not_folded[i]))])
+    if len(bounds_not_folded_ref[0])!=0:
+        if (bounds_not_folded_ref[0,0]==0 and not bounds_not_folded[0,0]==0):
+            bounds_not_folded_ref=np.array([bounds_not_folded_ref[i] for i in range(1,len(bounds_not_folded_ref[i]))])
+        elif (bounds_not_folded[0,0]==0 and not bounds_not_folded_ref[0,0]==0):
+            bounds_not_folded=np.array([bounds_not_folded[i] for i in range(1,len(bounds_not_folded[i]))])
 
     return bound_match,match_score,bounds_not_folded,bounds_not_folded_ref
 
@@ -150,3 +152,14 @@ def get_bounds_inverted(bounds,seq):
         bounds_inv[-1]+=[len(seq)]
 
     return np.array(bounds_inv)
+def get_top_x_pct(score_list,top_fraction,names=[]):
+    score_list=np.array(score_list)
+    nans_bool=np.invert(np.isnan(score_list))
+    temp_orth_top=np.array(score_list)[nans_bool]
+    top_ind_top=int(np.ceil(len(temp_orth_top)*(1-top_fraction)))
+    args_top=np.argsort(score_list)[min(top_ind_top,len(temp_orth_top)-1):]
+    if names!=[]:
+        out_name=names[args_top[-1]]
+    else:
+        out_name=None
+    return score_list[args_top],out_name
