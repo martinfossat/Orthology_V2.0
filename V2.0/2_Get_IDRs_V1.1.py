@@ -9,14 +9,14 @@ import Orthology_utils as OU
 if __name__=="__main__":
     ################## Parser declaration ######################
     parser = argparse.ArgumentParser(description="""Gets the predicted IDR regions, and predict their ensemble properties""")
-    parser.add_argument("--file_name","-f",help='File name containing the name of the genes in the "original" species in the first column, other columns are ignored.')
+    parser.add_argument("--file_name","-f",help='Name of the file containing the name of the genes in the "original" species in the first column, other columns are ignored.')
     parser.add_argument("--output_file_name","-of",help='Name of the outputfile. Default is Gene_names.txt')
-    parser.add_argument("--original_specie","-os",help="Original specie")
-    parser.add_argument("--additional_species","-as",help="Additional species",default=[],nargs='+')
-    parser.add_argument("--delete_x","-dx",help="Replace symbol X in proteins sequences by an emtpy character")
-    parser.add_argument("--delete_u","-du",help="Replace symbol U in proteins sequences by an emtpy character")
-    parser.add_argument("--delete_any","-da",help="Replace symbol * in proteins sequences by an emtpy character")
-    parser.add_argument("--max_size_factor","-msf",help="Factor for the length of the otrholog array compared to the input gene list size. Must be integer, bigger number is slower, but if many orhtolog exists, may be necessary")
+    # parser.add_argument("--original_specie","-os",help="Original specie")
+    # parser.add_argument("--additional_species","-as",help="Additional species",default=[],nargs='+')
+    # parser.add_argument("--delete_x","-dx",help="Replace symbol X in proteins sequences by an emtpy character")
+    # parser.add_argument("--delete_u","-du",help="Replace symbol U in proteins sequences by an emtpy character")
+    # parser.add_argument("--delete_any","-da",help="Replace symbol * in proteins sequences by an emtpy character")
+    # parser.add_argument("--max_size_factor","-msf",help="Factor for the length of the otrholog array compared to the input gene list size. Must be integer, bigger number is slower, but if many orhtolog exists, may be necessary")
     args = parser.parse_args()
 
     if args.file_name :
@@ -30,36 +30,36 @@ if __name__=="__main__":
     else :
         output_file='Sequence_properties.json'
 
-    if args.delete_x :
-        try :
-            X_is_None=bool(args.delete_x)
-        except :
-            print("Invalid option for replacing X")
-            X_is_None=True
-    else :
-        X_is_None=True
+    # if args.delete_x :
+    #     try :
+    #         X_is_None=bool(args.delete_x)
+    #     except :
+    #         print("Invalid option for replacing X")
+    #         X_is_None=True
+    # else :
+    #     X_is_None=True
+    #
+    # if args.delete_u :
+    #     try :
+    #         U_is_None=bool(args.delete_u)
+    #     except :
+    #         print("Invalid option for replacing X")
+    #         U_is_None=True
+    # else :
+    #     U_is_None=True
+    #
+    # if args.delete_any :
+    #     try :
+    #         Any_is_None=bool(args.delete_any)
+    #     except :
+    #         print("Invalid option for replacing X")
+    #         Any_is_None=True
+    # else :
+    #     Any_is_None=True
 
-    if args.delete_u :
-        try :
-            U_is_None=bool(args.delete_u)
-        except :
-            print("Invalid option for replacing X")
-            U_is_None=True
-    else :
-        U_is_None=True
-
-    if args.delete_any :
-        try :
-            Any_is_None=bool(args.delete_any)
-        except :
-            print("Invalid option for replacing X")
-            Any_is_None=True
-    else :
-        Any_is_None=True
-
-    # X_is_None=True
-    # U_is_None=True
-    # Any_is_None=True
+    X_is_None=True
+    U_is_None=True
+    Any_is_None=True
     # Whether to delete the X (undefined AAs)
 
     file_path=os.path.realpath(__file__)
@@ -71,6 +71,9 @@ if __name__=="__main__":
     f=open(filename)
     Orthology_all=json.load(f)
 
+    f=open('Sequences.json')
+    Sequences_all=json.load(f)
+
     Seq_Prop={}
     N1=0
     for orths in Orthology_all:
@@ -79,9 +82,7 @@ if __name__=="__main__":
         for orga in Orthology_all[orths]:
             for gene_id in Orthology_all[orths][orga]:
                 for seq_id in Orthology_all[orths][orga][gene_id]:
-                    if seq_id=='name':
-                        continue
-                    seq=Orthology_all[orths][orga][gene_id][seq_id]
+                    seq=Sequences_all[seq_id]
                     if X_is_None :
                         seq=seq.replace('X','')
                     if U_is_None :

@@ -30,6 +30,7 @@ if __name__=="__main__":
     parser.add_argument("--top_ortholog_fraction","-tof",help="Top fraction of orthologs that are kept using overall homology as a metric. 0 is only most homologous, 1 is all. ")
     parser.add_argument("--additional_species","-as",help="Additional species",default=[],nargs='+')
     args = parser.parse_args()
+    name_file='Names.json'
 
     if args.top_allele_fraction :
         try :
