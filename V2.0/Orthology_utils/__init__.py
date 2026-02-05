@@ -36,13 +36,14 @@ class Seq_Prop_Manager:
         q=QC.get_q_profile_from_F(pH,Meso_G_all,layers_q,298)
         iso_q_ind=np.argwhere(abs(q)==min(abs(q)))[0][0]
         self.SeqProp[seq_id][label][bounds_label]['pI']=str(pH[iso_q_ind])
-        self.SeqProp[seq_id][label][bounds_label]['q_at_pH']={}
+        #self.SeqProp[seq_id][label][bounds_label]['q_at_pH']={}
 
         for i in range(len(pH_ref)):
             # Find index closest to reference pH
             pH_ind=np.argwhere(abs(pH-pH_ref[i])==min(abs(pH-pH_ref[i])))[0][0]
             # Key is the reference pH, Value is the charge
-            self.SeqProp[seq_id][label][bounds_label]['q_at_pH'][str(pH_ref[i])]=str(q[pH_ind])
+
+            self.SeqProp[seq_id][label][bounds_label]['q_at_pH_'+str(pH_ref[i])]=str(q[pH_ind])
 
     def add_sequence_properties(self,seq_id,seq,label,bounds_label):
         if seq_id not in self.SeqProp:
