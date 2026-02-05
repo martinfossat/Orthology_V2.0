@@ -85,14 +85,14 @@ if __name__=="__main__":
             for orth_id in Orthology_all[orths][orga]:
                 # These are version of the saem gene (i.e. isoforms)
                 for seq_id in Orthology_all[orths][orga][orth_id]:
-                    if seq_id=='name':
-                        continue
                     seq_raw=Sequences_all[seq_id]
                     if clean_sequence :
                         seq_raw=OU.clean_seq(seq_raw)
                     for label in labels:
                         bounds,bounds_labels=SeqProp.get_bounds(seq_id,label)
                         for i in range(len(bounds)):
+                            if bounds[i,0]==bounds[i,1]:
+                                continue
                             if do_seq_pH:
                                 if force_prediction and label!="IDRs":
                                     SeqProp.add_pH_information(seq_id,seq_raw,pH_ref,pH,label,bounds_labels[i])

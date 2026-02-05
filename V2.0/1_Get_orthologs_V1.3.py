@@ -215,7 +215,7 @@ if __name__=="__main__":
                         seq_id=queries_seq_id_list[vers]
                         Sequences_all[seq_id]=queries_seq_list[vers]
                         Orthology_all[orths][orga][gene_id]+=[seq_id]
-                        #Orthology_all[orths][orga][gene_id][seq_id]=queries_seq_list[vers]
+
 
     with open(orthology_file,'w') as f:
         json.dump(Orthology_all,f)
