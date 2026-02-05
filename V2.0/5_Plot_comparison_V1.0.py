@@ -59,7 +59,7 @@ if __name__=="__main__":
     if args.homologies_file :
         homologies_file=args.homologies_file
     else :
-        homologies_file='Gene_homologies.json'
+        homologies_file='Homology.json'
 
     if args.name_file :
         name_file=args.name_file
@@ -153,14 +153,16 @@ if __name__=="__main__":
             save_temp_top,best_top_id=OU.get_top_x_pct(save_temp_top,top_ortholog_fraction,names=save_temp_ids_top)
             save_temp_norm,best_norm_id=OU.get_top_x_pct(save_temp_norm,top_ortholog_fraction,names=save_temp_ids_norm)
 
-            # Now I need to get the IDs of the best allele, best orthologs, for each ortholog
+            if not ((best_top_id is None ) or (best_norm_id is None)):
+                # There are cases where the the ortholog does not exist in one organism, so don't use
+                # Now I need to get the IDs of the best allele, best orthologs, for each ortholog
+                save_all_ids_top+=[best_top_id]
+                save_all_ids_norm+=[best_norm_id]
+                save_all_ids_ref+=[orth_ref]
+                save_all_compare+=[np.mean(save_temp_top)/np.mean(save_temp_norm)]
+                save_all_compare_top+=[np.mean(save_temp_top)]
+                save_all_compare_norm+=[np.mean(save_temp_norm)]
 
-            save_all_ids_top+=[best_top_id]
-            save_all_ids_norm+=[best_norm_id]
-            save_all_ids_ref+=[orth_ref]
-            save_all_compare+=[np.mean(save_temp_top)/np.mean(save_temp_norm)]
-            save_all_compare_top+=[np.mean(save_temp_top)]
-            save_all_compare_norm+=[np.mean(save_temp_norm)]
 
     save_all_ids_ref=np.array(save_all_ids_ref)
     save_all_ids_top=np.array(save_all_ids_top)
@@ -219,7 +221,6 @@ if __name__=="__main__":
     plt.savefig('2D_hist_2_species.pdf')
     plt.close()
 
-
     f=open(name_file)
     save_names=json.load(f)
 
@@ -233,6 +234,8 @@ if __name__=="__main__":
 
     W=ref_orga+'_id\t'+ref_orga+'_name\t'+specie_top+'_id\t'+specie_top+'_name\t'+specie_top+'_score\t'+specie_norm+'_id\t'+specie_norm+'_name\t'+specie_norm+'_score\t'+specie_top+'/'+specie_norm+'\n'
     for i in range(len(save_all_ids_ref)):
+        print(save_all_ids_ref[i],save_all_ids_top[i],save_all_ids_norm[i])
+        print(save_all_compare_top[i],save_all_compare_norm[i])
         W+=str(save_all_ids_ref[i])+'\t'+str(save_names[save_all_ids_ref[i]])+'\t'+str(save_all_ids_top[i])+'\t'+str(save_names[save_all_ids_top[i]])+'\t'+str(save_all_compare_top[i])+'\t'+str(save_all_ids_norm[i])+'\t'+str(save_names[save_all_ids_norm[i]])+'\t'+str(save_all_compare_norm[i])+'\t'+str(save_all_compare[i])+'\n'
 
     FU.write_file('Sorted_ids.txt',W)
