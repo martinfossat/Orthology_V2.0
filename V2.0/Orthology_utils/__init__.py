@@ -117,20 +117,6 @@ def find_matching_folded_domains(bounds,bounds_ref,seq_oth,seq_ref,length_max_ra
             temp_ref+=[bounds_not_folded_ref[i]]
     bounds_not_folded_ref=np.array(temp_ref)
     bounds_not_folded=np.array(temp)
-    # This is a correction : if the first residue is 0 in one and not the other, there is a disordered domain mismatch
-    # which must be removed
-    # if len(bounds_not_folded_ref[0])!=0 and len(bounds_not_folded[0]!=0):
-    #     if (bounds_not_folded_ref[0,0]==0 and not bounds_not_folded[0,0]==0):
-    #         bounds_not_folded_ref=np.array([bounds_not_folded_ref[i] for i in range(1,len(bounds_not_folded_ref))])
-        # elif (bounds_not_folded[0,0]==0 and not bounds_not_folded_ref[0,0]==0):
-        #     bounds_not_folded=np.array([bounds_not_folded[i] for i in range(1,len(bounds_not_folded))])
-    # But if one of not folded is empty and not the other :
-    # That means :
-
-
-
-
-
     return bound_match,match_score,bounds_not_folded,bounds_not_folded_ref
 
 def get_homology_score(seq_ref,seq,local):
