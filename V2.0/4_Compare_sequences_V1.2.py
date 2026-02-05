@@ -49,7 +49,7 @@ if __name__=="__main__":
     if args.orthology_file :
         orthology_file=args.orthology_file
     else :
-        orthology_file='Gene_orthology.json'
+        orthology_file='Orthology.json'
 
     if args.properties_file :
         properties_file=args.properties_file
@@ -181,8 +181,11 @@ if __name__=="__main__":
                             bounds_dis,bounds_labels_dis=SeqProp.get_bounds(seq_id,"IDRs")
 
                             for m in range(len(bounds_not_folded)):
+
                                 seq_ref=seq_ref_raw[bounds_not_folded_ref[m,0]:bounds_not_folded_ref[m,1]]
                                 seq_oth=seq_raw[bounds_not_folded[m,0]:bounds_not_folded[m,1]]
+
+
 
                                 score,norm=OU.get_homology_score(seq_ref,seq_oth,local)
                                 bounds_label=str(bounds_not_folded_ref[m,0])+'_'+str(bounds_not_folded_ref[m,1])+'_&_'+str(bounds_not_folded[m,0])+'_'+str(bounds_not_folded[m,1])

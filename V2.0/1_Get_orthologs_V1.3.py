@@ -32,7 +32,7 @@ def query_profiler(organism_org,organism_target,gene_name,max_wait=30):
 
 server = "https://rest.ensembl.org/"
 
-Orthology_all=np.array([])
+# Orthology_all=np.array([])
 
 if __name__=="__main__":
     ################## Parser declaration ######################
