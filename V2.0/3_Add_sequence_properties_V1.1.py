@@ -1,4 +1,3 @@
-from sparrow.predictors import batch_predict
 import json
 import matplotlib
 import qcan_utils as QC

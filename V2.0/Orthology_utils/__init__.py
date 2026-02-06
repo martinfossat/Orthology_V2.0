@@ -85,6 +85,34 @@ class Seq_Prop_Manager:
             return float('NaN')
         else :
             return float(self.SeqProp[seq_id][label][bounds_label][val_type])
+def query_profiler(organism_org,organism_target,gene_name,max_wait=30):
+    import requests
+    import time
+    wait=0
+    while wait<max_wait:
+        r2=requests.post(url='https://biit.cs.ut.ee/gprofiler/api/orth/orth/',
+                         json={'organism':organism_org,'target':organism_target,'query':gene_name})
+        out=r2.json()
+
+        try:
+            r2=requests.post(url='https://biit.cs.ut.ee/gprofiler/api/orth/orth/',
+                             json={'organism':organism_org,'target':organism_target,'query':gene_name})
+            out=r2.json()
+            break
+        except:
+            time.sleep(1)
+            wait+=1
+            print('Waited '+str(wait)+' seconds')
+    return out
+
+def get_all_ids(Orthology_all):
+    ids=[]
+    for orths in Orthology_all:
+        for orga in Orthology_all[orths]:
+            for gene_id in Orthology_all[orths][orga]:
+                ids+=[gene_id]
+    return ids
+
 def find_matching_folded_domains(bounds,bounds_ref,seq_oth,seq_ref,length_max_ratio=0.8,homology_min=0.4):
     bound_match=[]
     match_score=[]
@@ -173,3 +201,200 @@ def clean_seq(seq) :
     seq = seq.replace('U', '')
     seq = seq.replace('X', '')
     return seq
+def get_all_homologies(ref_orga,orth_ref,label,specie,save_homo,min_len_ratio,top_iso_fraction):
+    save_temp_ids=[]
+    save_temp=[]
+    for orth in save_homo[ref_orga][specie][orth_ref]:
+        temp=[]
+        for prot_ref in save_homo[ref_orga][specie][orth_ref][orth]:
+            for prot in save_homo[ref_orga][specie][orth_ref][orth][prot_ref]:
+                temp_region=[]
+                # names_iso_temp=[]
+
+                for region in save_homo[ref_orga][specie][orth_ref][orth][prot_ref][prot][label]:
+                    reg1=np.array(region.split('_&_')[0].split('_'),dtype=int)
+                    len1=reg1[1]-reg1[0]
+                    reg2=np.array(region.split('_&_')[1].split('_'),dtype=int)
+                    len2=reg2[1]-reg2[0]
+
+                    if min(len1,len2)/max(len1,len2)<min_len_ratio:
+                        print(len1,len2)
+                        continue
+                    temp_region+=[float(
+                        save_homo[ref_orga][specie][orth_ref][orth][prot_ref][prot][label][region]['Homology_ratio'])]
+                if len(temp_region)!=0:
+                    temp+=[np.mean(temp_region)]
+        save_temp+=[np.mean(get_top_x_pct(temp,top_iso_fraction)[0])]
+        save_temp_ids+=[orth]
+    return save_temp,save_temp_ids
+
+def plot_2d_hist(x,y,xlabel,ylabel,x_ticks,y_ticks,name,binwidth):
+    import matplotlib
+    matplotlib.use("pgf")
+    from matplotlib.backends.backend_pgf import FigureCanvasPgf
+    matplotlib.backend_bases.register_backend('pdf',FigureCanvasPgf)
+    pgf_with_latex={
+        "text.usetex":True,
+        "pgf.preamble":
+            r'\usepackage{color}',
+        "font.family":"Times New Roman"}
+    import matplotlib
+    matplotlib.rcParams.update(pgf_with_latex)
+    import matplotlib.pyplot as plt
+
+    plt.figure(figsize=(4,4))
+    plt.subplot2grid((8,8),(1,0),colspan=7,rowspan=7)
+
+    bins_x=np.arange(0,np.nanmax(x)+binwidth,binwidth)
+    bins_y=np.arange(0,np.nanmax(y)+binwidth,binwidth)
+
+    hist=np.histogram2d(x,y,bins=[bins_x,bins_y])[0]
+
+    plt.xticks(x_ticks,x_ticks)
+    plt.yticks(y_ticks,y_ticks)
+
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+
+    plt.plot([0,1],[0,1],linestyle='--',color='k')
+    plt.imshow(hist,aspect='auto',origin='lower',interpolation='None',cmap='Spectral',extent=(0.,np.nanmax(y),0.,np.nanmax(x)))
+
+    plt.subplot2grid((8,8),(1,7),colspan=1,rowspan=7)
+    bins=np.arange(0,np.nanmax(x)+binwidth,binwidth)
+    plt.ylim(0,np.nanmax(x))
+    plt.yticks([],[])
+    plt.xticks([],[])
+    plt.hist(x,bins=bins,orientation='horizontal',histtype='step',color='g')
+
+    plt.subplot2grid((8,8),(0,0),colspan=7,rowspan=1)
+    bins=np.arange(0,np.nanmax(y)+binwidth,binwidth)
+    plt.xlim(0,np.nanmax(y))
+    plt.yticks([],[])
+    plt.xticks([],[])
+    plt.hist(y,bins=bins,histtype='step',color='g')
+    plt.savefig(name)
+    plt.close()
+
+
+def plot_hist(save_all_prop,region_types,species,label_dic,bin_properties):
+    import matplotlib
+    matplotlib.use("pgf")
+    from matplotlib.backends.backend_pgf import FigureCanvasPgf
+    matplotlib.backend_bases.register_backend('pdf',FigureCanvasPgf)
+    pgf_with_latex={
+        "text.usetex":True,
+        "pgf.preamble":
+            r'\usepackage{color}',
+        "font.family":"Times New Roman"}
+    import matplotlib
+    matplotlib.rcParams.update(pgf_with_latex)
+    import matplotlib.pyplot as plt
+
+    colors=[plt.cm.gist_rainbow(i/(len(species))) for i in range(len(species))]
+    type_ensemble=[]
+    for region_type in region_types:
+        FU.check_and_create_rep('Plots/'+region_type)
+        for prop in save_all_prop:
+            if not prop in bin_properties:
+                continue
+            if not prop in type_ensemble :
+                type_ensemble+=[prop]
+            j=0
+            if not region_type in save_all_prop[prop]:
+                continue
+            for orga in save_all_prop[prop][region_type]:
+                # if prop in bin_properties:
+                temp_tuple=()
+                #Need to remove and do explicitly, this nis not necessary
+                for i in range(2):
+                    if bin_properties[prop][i] is None :
+
+                        if i==0:
+                            modulo=np.amin(save_all_prop[prop][region_type][orga])%bin_properties[prop][2]
+                            temp_tuple+=(np.amin(save_all_prop[prop][region_type][orga])-modulo-bin_properties[prop][2],)
+
+                        else :
+                            modulo=np.amax(save_all_prop[prop][region_type][orga])%bin_properties[prop][2]
+                            temp_tuple+=(np.amax(save_all_prop[prop][region_type][orga])+(1-modulo)+bin_properties[prop][2],)
+                    else :
+                        if i==0:
+                            temp_tuple+=(bin_properties[prop][i]-bin_properties[prop][2],)
+                        else :
+                            temp_tuple+=(bin_properties[prop][i]+bin_properties[prop][2],)
+                temp_tuple+=(bin_properties[prop][2],)
+                bins=np.arange(temp_tuple[0],temp_tuple[1],temp_tuple[2])
+
+                bins_center=(bins[1:]+bins[:-1])/2.
+                hist,bins_temp=np.histogram(save_all_prop[prop][region_type][orga],bins=bins)
+                if len(hist)>0:
+                    hist=hist/np.amax(hist)
+                    plt.step(bins_center,hist,linewidth=1,color=colors[j],label=orga)
+                    j+=1
+            if prop in label_dic:
+                xlabel=label_dic[prop]
+            else :
+                xlabel=prop
+            plt.xlabel(xlabel)
+            plt.xlim(bin_properties[prop][0],bin_properties[prop][1])
+            plt.legend()
+            plt.savefig('Plots/'+region_type+"/Hist_ensemble_"+prop+'_'+region_type+'.pdf')
+            plt.close()
+
+def plot_bar_charts(save_all_prop,region_types,species,ensembles,name,label_dic_short):
+    import matplotlib
+    matplotlib.use("pgf")
+    from matplotlib.backends.backend_pgf import FigureCanvasPgf
+    matplotlib.backend_bases.register_backend('pdf',FigureCanvasPgf)
+    pgf_with_latex={
+        "text.usetex":True,
+        "pgf.preamble":
+            r'\usepackage{color}',
+        "font.family":"Times New Roman"}
+    import matplotlib
+    matplotlib.rcParams.update(pgf_with_latex)
+    import matplotlib.pyplot as plt
+
+    colors=[plt.cm.gist_rainbow(i/(len(species))) for i in range(len(species))]
+
+    type_ensemble=[]
+    for region_type in region_types:
+        i=0
+        FU.check_and_create_rep('Plots/'+region_type)
+        N_offset=1
+        for prop in save_all_prop:
+            if not prop in ensembles:
+                continue
+            if not prop in type_ensemble:
+                type_ensemble+=[prop]
+            j=0
+            if not region_type in save_all_prop[prop]:
+                continue
+            for orga in save_all_prop[prop][region_type]:
+
+                if i!=0:
+                    pre='_'
+                else:
+                    pre=''
+                pos=i-0.5+(j+1)/(len(species)+N_offset)
+                if prop=='pct_folded':
+                    norm=100.
+                else :
+                    norm=1.
+                value=np.mean(np.array(save_all_prop[prop][region_type][orga])/norm)
+                val_std=np.std(np.array(save_all_prop[prop][region_type][orga])/norm)
+                plt.bar(pos,value,color=colors[j],width=1/(len(species)+N_offset),label=pre+orga,yerr=val_std,capsize=3)
+                j+=1
+            i+=1
+        plt.title('Predicted ensemble properties')
+        plt.legend()
+        xticks=[i for i in range(len(type_ensemble))]
+        x_labels=[]
+        for t in range(len(type_ensemble)):
+            if type_ensemble[t] in label_dic_short:
+                x_labels+=[label_dic_short[type_ensemble[t]]]
+            else :
+                x_labels+=[type_ensemble[t].replace("_"," ")]
+        plt.xticks(xticks,x_labels,rotation=45,ha='right',va='top')
+        plt.tight_layout()
+        plt.savefig('Plots/'+region_type+"/Ensemble_properties_"+name+".pdf")
+        plt.close()

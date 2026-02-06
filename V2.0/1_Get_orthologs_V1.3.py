@@ -3,36 +3,10 @@ import numpy as np
 import requests
 import json
 import os
-import time
-import sys
 import argparse
-# Ok so as far as I understand it the goal of this will be :
-# For each gene in zebra fish, find an ortholog in human and/or mouse
-# For each of these ortholog, get an identity score
-# For each of these ortholog, check localization and sequence
-# How do we classify sequences/determine which is better
-def query_profiler(organism_org,organism_target,gene_name,max_wait=30):
-    import requests
-    wait=0
-    while wait<max_wait:
-        r2=requests.post(url='https://biit.cs.ut.ee/gprofiler/api/orth/orth/',
-                         json={'organism':organism_org,'target':organism_target,'query':gene_name})
-        out=r2.json()
-
-        try:
-            r2=requests.post(url='https://biit.cs.ut.ee/gprofiler/api/orth/orth/',
-                             json={'organism':organism_org,'target':organism_target,'query':gene_name})
-            out=r2.json()
-            break
-        except:
-            time.sleep(1)
-            wait+=1
-            print('Waited '+str(wait)+' seconds')
-    return out
+import Orthology_utils as OU
 
 server = "https://rest.ensembl.org/"
-
-# Orthology_all=np.array([])
 
 if __name__=="__main__":
     ################## Parser declaration ######################
@@ -121,13 +95,6 @@ if __name__=="__main__":
 
     Names_all={}
     Orthology_all={}
-    def get_all_ids(json_data):
-        ids=[]
-        for orths in Orthology_all:
-            for orga in Orthology_all[orths]:
-                for gene_id in Orthology_all[orths][orga]:
-                    ids+=[gene_id]
-        return ids
 
     print('Getting ortholog names')
     for t in range(1,len(organisms_all)):
@@ -139,7 +106,7 @@ if __name__=="__main__":
         #Gets the names from the input file
         gene_names=np.ndarray.tolist(data[N_q*max_query_size:min((N_q+1)*max_query_size,len(data[:]))])
         #get the ortholog names from the profiler website
-        out=query_profiler(organisms_all[ind_org],organisms_all[t],gene_names)
+        out=OU.query_profiler(organisms_all[ind_org],organisms_all[t],gene_names)
         print("Query received (size="+str(len(out['result']))+")")
 
         for i in range(len(out['result'])):
@@ -173,7 +140,7 @@ if __name__=="__main__":
     queries_seq_list=[]
     queries_seq_id_list=[]
 
-    all_ids=get_all_ids(Orthology_all)
+    all_ids=OU.get_all_ids(Orthology_all)
     LEN_MAX=50 # This si the maxx rom the ensemble rest API
     N=0
     #Turns out, the server would rather have lots of connection than big requests....
@@ -182,10 +149,8 @@ if __name__=="__main__":
         ext='sequence/id/'+'?multiple_sequences=1;type=protein'
         headers={"Content-Type":"application/json","Accept":"application/json"}
         r=requests.post(server+ext,headers=headers,data='{ "ids" : '+str(all_ids[N*LEN_MAX:(N+1)*LEN_MAX]).replace("'",'"')+' }')
-        #print(r)
         seqs_ref=r.json()
         N+=1
-
         # This is to avoid the no results coming back from the query (is a dict instead of a list)
         if type(seqs_ref)!=type([]):
             continue

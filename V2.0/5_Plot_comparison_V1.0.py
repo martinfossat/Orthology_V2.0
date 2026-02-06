@@ -25,14 +25,37 @@ if __name__=="__main__":
     Species name must follow the id in gProfiler (https://biit.cs.ut.ee/gprofiler/page/organism-list).\n
     The output is a file containing the gene name and gene IDs for all species, and that is required to use subsequent programs.""")
     parser.add_argument("--homologies_file","-hf",help='Name of the homology database file. Default is Gene_homologies.json')
-    #parser.add_argument("--orthology_file","-of",help='Name of the orthology file')
     parser.add_argument("--name_file","-nf",help='Name of the names database json output file. Default is Names.json')
     parser.add_argument("--reference_specie","-rs",help="Reference specie")
-    parser.add_argument("--top_iso_fraction","-taf",help="Top fraction of isoforms that are kept using overall homology as a metric. 0 is only most homologous, 1 is all.")
+    parser.add_argument("--top_specie","-ts",help="Top specie for the comparison (top_specie/norm_specie)")
+    parser.add_argument("--norm_specie","-ns",help="Norm specie for the comparison (top_specie/norm_specie)")
+    parser.add_argument("--top_iso_fraction","-tif",help="Top fraction of isoforms that are kept using overall homology as a metric. 0 is only most homologous, 1 is all.")
     parser.add_argument("--top_ortholog_fraction","-tof",help="Top fraction of orthologs that are kept using overall homology as a metric. 0 is only most homologous, 1 is all. ")
-    parser.add_argument("--min_len_ratio","-mlr",help="")
-    parser.add_argument("--additional_species","-as",help="Additional species",default=[],nargs='+')
+    parser.add_argument("--min_len_ratio","-mlr",help="Mimimun length ratio between the species and the reference species for orthologs to be plotted")
+    parser.add_argument("--bin_width","-bw",help="Width of the bins for histograms. Default is 0.2")
+
     args = parser.parse_args()
+
+    if args.min_len_ratio :
+        try :
+            min_len_ratio=float(args.min_len_ratio)
+            if min_len_ratio<0 or min_len_ratio>1.:
+                print("Wrong value for min_len_ratio. Please use a number between 0 and 1")
+                quit()
+        except :
+            print("Wrong format for min_len_ratio")
+            quit()
+    else :
+        min_len_ratio=0.0
+    if args.bin_width :
+        try :
+            binwidth=float(args.bin_width)
+
+        except :
+            print("Wrong format for bin bin_width")
+            quit()
+    else :
+        binwidth=0.02
 
     if args.top_iso_fraction :
         try :
@@ -53,6 +76,7 @@ if __name__=="__main__":
                 quit()
         except :
             print("Wrong format for mof")
+            quit()
     else :
         top_ortholog_fraction=0.0
 
@@ -68,94 +92,54 @@ if __name__=="__main__":
         name_file='Names.json'
 
     if args.reference_specie :
-        ref_org=args.reference_specie
+        ref_orga=args.reference_specie
     else :
         print("You must specify a reference specie")
         quit(1)
 
-    if args.additional_species :
-        other_organism=args.additional_species
+    if args.top_specie :
+        specie_top=args.top_specie
     else :
-        other_organism=[]
-    ref_orga = ref_org
-    file_path=os.path.realpath(__file__)
+        print("You must specify a top specie")
+        quit(1)
 
+    if args.norm_specie :
+        specie_norm=args.norm_specie
+    else :
+        print("You must specify a top specie")
+        quit(1)
+
+    file_path=os.path.realpath(__file__)
     with open(os.path.dirname(file_path)+"/g_Profiler_Organisms_names_dic.json", "r") as fp:
         dictionary_organisms_gprofiler = json.load(fp)
 
     dictionary_organisms_gprofiler_inv=dict(zip(dictionary_organisms_gprofiler.values(), dictionary_organisms_gprofiler.keys()))
 
-    all_orga=[ref_org]+other_organism
-    species=all_orga
-
-    pct_top_orth=top_ortholog_fraction
-    #pct_top_alle=top_allele_fraction
-
     f=open(homologies_file)
     save_homo=json.load(f)
-    # This contains the precomputed IDR ensemble properties from ALBATROSS
-    region_types=['all']#,'IDRs','FDs']
-    # I need to save the top of each score as a function of the top of all other scores
-    # What I can do is keep the scores in lists with the same index.
-    specie_norm='mmusculus'
-    specie_top = 'drerio'
 
-    plt.close()
+    region_types=['all']#,'IDRs','FDs']
+
     save_all_compare=[]
     save_all_ids_ref=[]
     save_all_ids_top = []
     save_all_ids_norm = []
-
     save_all_compare_norm=[]
     save_all_compare_top = []
-    if pct_top_orth !=0. :
-        print("This is not currently possible")
-        exit()
 
     for label in region_types:
         for orth_ref in save_homo[ref_orga][specie_top]:
             if not orth_ref in save_homo[ref_orga][specie_norm].keys():
                 # Skip if an orhtolog exist in only one of the species that we are comparing
                 continue
-            save_temp_top=[]
-            save_temp_norm=[]
-            #Norm
-            # For each orthologs, find all the scores for the top and norm species.
-            save_temp_ids_top=[]
-            save_temp_ids_norm=[]
-            for orth in save_homo[ref_orga][specie_top][orth_ref]:
-                temp_top=[]
-                for prot_ref in save_homo[ref_orga][specie_top][orth_ref][orth]:
-                    for prot in save_homo[ref_orga][specie_top][orth_ref][orth][prot_ref]:
-                        temp_region=[]
-                        names_iso_temp=[]
-                        for region in save_homo[ref_orga][specie_top][orth_ref][orth][prot_ref][prot][label]:
-                            temp_region+=[float(save_homo[ref_orga][specie_top][orth_ref][orth][prot_ref][prot][label][region]['Homology_ratio'])]
-                        if len(temp_region)!=0:
-                            temp_top+=[np.mean(temp_region)]
-                save_temp_top+=[np.mean(OU.get_top_x_pct(temp_top,top_iso_fraction)[0])]
-                save_temp_ids_top+=[orth]
-
-            # For each orthologs, find all the scores for the top and norm species.
-            for orth in save_homo[ref_orga][specie_norm][orth_ref]:
-                temp_top=[]
-                for prot_ref in save_homo[ref_orga][specie_norm][orth_ref][orth]:
-                    for prot in save_homo[ref_orga][specie_norm][orth_ref][orth][prot_ref]:
-                        temp_region=[]
-                        for region in save_homo[ref_orga][specie_norm][orth_ref][orth][prot_ref][prot][label]:
-                            temp_region+=[float(save_homo[ref_orga][specie_norm][orth_ref][orth][prot_ref][prot][label][region]['Homology_ratio'])]
-                        if len(temp_region)!=0:
-                            temp_top+=[np.mean(temp_region)]
-
-                save_temp_norm+=[np.mean(OU.get_top_x_pct(temp_top,top_iso_fraction)[0])]
-                save_temp_ids_norm+=[orth]
+            save_temp_top,save_temp_ids_top=OU.get_all_homologies(ref_orga,orth_ref,label,specie_top,save_homo,min_len_ratio,top_iso_fraction)
+            save_temp_norm,save_temp_ids_norm=OU.get_all_homologies(ref_orga,orth_ref,label,specie_norm,save_homo,min_len_ratio,top_iso_fraction)
 
             save_temp_top,best_top_id=OU.get_top_x_pct(save_temp_top,top_ortholog_fraction,names=save_temp_ids_top)
             save_temp_norm,best_norm_id=OU.get_top_x_pct(save_temp_norm,top_ortholog_fraction,names=save_temp_ids_norm)
 
             if not ((best_top_id is None ) or (best_norm_id is None)):
                 # There are cases where the the ortholog does not exist in one organism, so don't use
-                # Now I need to get the IDs of the best allele, best orthologs, for each ortholog
                 save_all_ids_top+=[best_top_id]
                 save_all_ids_norm+=[best_norm_id]
                 save_all_ids_ref+=[orth_ref]
@@ -163,7 +147,7 @@ if __name__=="__main__":
                 save_all_compare_top+=[np.mean(save_temp_top)]
                 save_all_compare_norm+=[np.mean(save_temp_norm)]
 
-
+    # List into array conversion
     save_all_ids_ref=np.array(save_all_ids_ref)
     save_all_ids_top=np.array(save_all_ids_top)
     save_all_ids_norm=np.array(save_all_ids_norm)
@@ -171,59 +155,50 @@ if __name__=="__main__":
     save_all_compare_top= np.array(save_all_compare_top)
     save_all_compare_norm= np.array(save_all_compare_norm)
 
+    ################ Plotting 2D histograms
+    tick_sep=0.2
+    x_ticks=np.round(np.arange(0,1+tick_sep, tick_sep),3)
+    y_ticks =np.round(np.arange(0,1+tick_sep, tick_sep),3)
+    ylabel='Normalized homology ratio '+specie_norm+' to '+ref_orga
+    xlabel='Normalized homology ratio '+specie_top+' to '+ref_orga
+    name='2D_hist_2_species.pdf'
+    OU.plot_2d_hist(save_all_compare_norm,save_all_compare_top,xlabel,ylabel,x_ticks,y_ticks,name,binwidth)
 
-    plt.figure('2D_hist_norm',figsize=(4,4))
-    binwidth = 0.01
+    x_ticks=np.round(np.arange(0, np.nanmax(save_all_compare_top)+tick_sep, tick_sep),3)
+    y_ticks =np.round(np.arange(0, np.nanmax(save_all_compare)+tick_sep, tick_sep),3)
+    xlabel='Normalized homology ratio '+specie_top+' to '+ref_orga
+    ylabel='Normalized homology ratio ('+specie_top+'/'+specie_norm+')'
+    name='2D_hist_top.pdf'
+    OU.plot_2d_hist(save_all_compare,save_all_compare_top,xlabel,ylabel,x_ticks,y_ticks,name,binwidth)
 
-    bins_x=np.arange(0, np.nanmax(save_all_compare), binwidth)
-    bins_y=np.arange(0, 1, binwidth)
-    yticks_lab=[i for i in range(len(bins_x))]
-    tick_sep=1
-    x_ticks=np.arange(0, np.nanmax(save_all_compare), tick_sep)
-    y_ticks = np.arange(0, np.nanmax(save_all_compare), tick_sep)
-    hist=np.histogram2d(save_all_compare,save_all_compare_norm,bins=[bins_x,bins_y])[0]
+    x_ticks=np.round(np.arange(0, np.nanmax(save_all_compare_norm)+tick_sep, tick_sep),3)
+    y_ticks =np.round(np.arange(0, np.nanmax(save_all_compare)+tick_sep, tick_sep),3)
+    xlabel='Normalized homology ratio '+specie_norm+' to '+ref_orga
+    ylabel='Normalized homology ratio ('+specie_top+'/'+specie_norm+')'
+    name='2D_hist_norm.pdf'
+    OU.plot_2d_hist(save_all_compare,save_all_compare_norm,xlabel,ylabel,x_ticks,y_ticks,name,binwidth)
 
-    plt.yticks(x_ticks,x_ticks)
-    plt.xticks(y_ticks,y_ticks)
-
-    plt.ylabel('Normalized homology ratio ('+specie_top+'/'+specie_norm+')')
-    plt.xlabel('Normalized homology ratio '+specie_norm+' to '+ref_org)
-
-    plt.imshow(hist,aspect='auto',origin='lower',extent=(0.,np.nanmax(save_all_compare_norm),0.,np.nanmax(save_all_compare)),interpolation='None',cmap='Spectral')
-    plt.ylim(0,3)
-    plt.savefig('2D_hist_norm.pdf')
+    # Plotting 1D histograms
+    bins=np.arange(0,1+binwidth,binwidth)
+    plt.title('Normalized homology to hsapiens')
+    plt.xlim(0,1)
+    plt.hist(save_all_compare_norm,bins=bins,histtype='step',color='orange',label=specie_norm)
+    plt.hist(save_all_compare_top,bins=bins,histtype='step',color='g',label=specie_top)
+    plt.legend()
+    plt.ylabel("Number of occurences")
+    plt.xlabel("Normalized homology to "+ref_orga)
+    plt.savefig('Hist_both_species.pdf')
     plt.close()
 
-    plt.figure('2D_hist_top',figsize=(4,4))
-    hist=np.histogram2d(save_all_compare,save_all_compare_top,bins=[bins_x,bins_y])[0]
-    plt.yticks(x_ticks,x_ticks)
-    plt.xticks(y_ticks, y_ticks)
-    plt.ylabel('Normalized homology ratio ('+specie_top+'/'+specie_norm+')')
-    plt.xlabel('Normalized homology ratio '+specie_top+' to '+ref_org)
-    plt.imshow(hist,aspect='auto',origin='lower',extent=(0.,np.nanmax(save_all_compare_top),0.,np.nanmax(save_all_compare)),interpolation='None',cmap='Spectral')
-    plt.ylim(0,3)
-    plt.savefig('2D_hist_top.pdf')
+    bins = np.arange(0, np.nanmax(save_all_compare)+binwidth, binwidth)
+    plt.xlim(0,np.nanmax(save_all_compare)+binwidth)
+    plt.hist(save_all_compare,bins=bins,histtype='step',color='k')
+    plt.ylabel("Number of occurences")
+    plt.xlabel('Normalized homology to '+ref_orga+' ratio ('+specie_top+'/'+specie_norm+')')
+    plt.savefig('Hist_ratio_'+specie_top+'_'+specie_norm+'.pdf')
     plt.close()
 
-    plt.figure('2D_hist_norm',figsize=(4,4))
-
-    bins_x=np.arange(0, 1, binwidth)
-    bins_y=np.arange(0, 1, binwidth)
-    hist=np.histogram2d(save_all_compare_norm,save_all_compare_top,bins=[bins_x,bins_y])[0]
-
-    plt.yticks(x_ticks,x_ticks)
-    plt.xticks(y_ticks, y_ticks)
-    plt.ylabel('Normalized homology ratio '+specie_norm+' to '+ref_org)
-    plt.xlabel('Normalized homology ratio '+specie_top+' to '+ref_org)
-    plt.plot([0,1],[0,1],linestyle='--',color='k')
-    plt.imshow(hist,aspect='auto',origin='lower',interpolation='None',cmap='Spectral',extent=(0.,1,0.,1))
-
-    plt.savefig('2D_hist_2_species.pdf')
-    plt.close()
-
-    f=open(name_file)
-    save_names=json.load(f)
-
+    # Sorting for the text file
     inds_sorted=np.argsort(save_all_compare)
     save_all_ids_ref=save_all_ids_ref[inds_sorted]
     save_all_ids_top=save_all_ids_top[inds_sorted]
@@ -231,32 +206,14 @@ if __name__=="__main__":
     save_all_compare=save_all_compare[inds_sorted]
     save_all_compare_top=save_all_compare_top[inds_sorted]
     save_all_compare_norm=save_all_compare_norm[inds_sorted]
+    # Getting the names of the genes from the file
+    f=open(name_file)
+    save_names=json.load(f)
 
+    # Wrtting the sorted homology comaprison
     W=ref_orga+'_id\t'+ref_orga+'_name\t'+specie_top+'_id\t'+specie_top+'_name\t'+specie_top+'_score\t'+specie_norm+'_id\t'+specie_norm+'_name\t'+specie_norm+'_score\t'+specie_top+'/'+specie_norm+'\n'
     for i in range(len(save_all_ids_ref)):
-        print(save_all_ids_ref[i],save_all_ids_top[i],save_all_ids_norm[i])
-        print(save_all_compare_top[i],save_all_compare_norm[i])
         W+=str(save_all_ids_ref[i])+'\t'+str(save_names[save_all_ids_ref[i]])+'\t'+str(save_all_ids_top[i])+'\t'+str(save_names[save_all_ids_top[i]])+'\t'+str(save_all_compare_top[i])+'\t'+str(save_all_ids_norm[i])+'\t'+str(save_names[save_all_ids_norm[i]])+'\t'+str(save_all_compare_norm[i])+'\t'+str(save_all_compare[i])+'\n'
 
     FU.write_file('Sorted_ids.txt',W)
 
-    bins = np.arange(0, np.nanmax(save_all_compare_norm), binwidth)
-    plt.title('Normalized homology to hsapiens ')
-    plt.xlim(0,3)
-    plt.hist(save_all_compare_norm,bins=bins)
-    plt.savefig(specie_norm+'_hist.pdf')
-    plt.close()
-
-    bins = np.arange(0, np.nanmax(save_all_compare_top), binwidth)
-    plt.title('Normalized homology to hsapiens '+specie_top)
-    plt.xlim(0,3)
-    plt.hist(save_all_compare_top,bins=bins)
-    plt.savefig(specie_top+'_hist.pdf')
-    plt.close()
-
-    bins = np.arange(0, np.nanmax(save_all_compare), binwidth)
-    plt.title('Normalized homology to hsapiens '+specie_norm)
-    plt.xlim(0,3)
-    plt.hist(save_all_compare,bins=bins)
-    plt.savefig('Compare_species.pdf')
-    plt.close()

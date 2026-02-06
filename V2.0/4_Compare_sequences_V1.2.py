@@ -33,7 +33,23 @@ if __name__=="__main__":
     parser.add_argument("--additional_species","-as",help="Additional species",default=[],nargs='+')
     #parser.add_argument("--max_size_factor","-msf",help="Factor for the length of the ortholog array compared to the input gene list size. Must be integer, bigger number is slower, but if many ortholog exists, may be necessary")
     #parser.add_argument("--delete_cross_refs","-dcr",help="Whether gene name that share an ortholog should be delete, so they don't appear twice.  1 is delete, 0 is keep.")
+    parser.add_argument("--do_homo","-dh",help="Whether tp calculate the homology score. 1 is on, 0 is off. Default is 1",default=1)
     args = parser.parse_args()
+
+
+    if args.do_homo :
+        try :
+            if int(args.do_homo)==1 :
+                do_homo=True
+            elif int(args.do_homo)==0 :
+                do_homo=False
+            else :
+                print("Wrong value for do_homo. Can only be 1 or 0")
+        except :
+            print("Wrong format for do_homo")
+
+    else :
+        do_homo=True
 
     if args.min_len_fraction :
         try :
@@ -95,6 +111,8 @@ if __name__=="__main__":
     Sequences_all=json.load(f)
     local=True
     SeqProp=OU.Seq_Prop_Manager(properties_file)
+
+    # I should load the existing file in case one wants to do a difference comparison
     Sequence_homology_all={}
 
     Sequence_homology_all[ref_org]={oth:{} for oth in all_orga}
@@ -113,7 +131,6 @@ if __name__=="__main__":
             continue
 
         for orga in Orthology_all[orths]:
-            print(orga)
             #  Dimension for each orga
             for orth_ref_id in Orthology_all[orths][ref_org]:
                 if orth_ref_id=='N/A':
@@ -128,8 +145,6 @@ if __name__=="__main__":
                         Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id]={}
                      # These are version of the same gene (i.e. isoform)
                     for ref_id in Orthology_all[orths][ref_org][orth_ref_id]:
-                        if ref_id=='name':
-                            continue
                         if not ref_id in Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id].keys():
                             Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id]={}
                     
@@ -138,8 +153,6 @@ if __name__=="__main__":
                             seq_ref_raw=OU.clean_seq(seq_ref_raw)
                         
                         for seq_id in Orthology_all[orths][orga][orth_id]:
-                            if seq_id=='name':
-                                continue
                             if not seq_id in Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id].keys():
                                 Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]={}
                             seq_raw=Sequences_all[seq_id]
@@ -149,11 +162,14 @@ if __name__=="__main__":
                             if min(len(seq_ref_raw),len(seq_raw))/max(len(seq_ref_raw),len(seq_raw))<length_ratio :
                                 continue
 
-                            score,norm=OU.get_homology_score(seq_raw,seq_ref_raw,local=local)
                             Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["all"]={}
-                            Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["all"][str(0)+'_'+str(len(seq_ref_raw))+'_&_'+str(0)+'_'+str(len(seq_raw))]={}
-                            Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["all"][str(0)+'_'+str(len(seq_ref_raw))+'_&_'+str(0)+'_'+str(len(seq_raw))]['Homology']=str(score)
-                            Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["all"][str(0)+'_'+str(len(seq_ref_raw))+'_&_'+str(0)+'_'+str(len(seq_raw))]['Homology_ratio']=str(norm)
+                            bounds_label=str(0)+'_'+str(len(seq_ref_raw))+'_&_'+str(0)+'_'+str(len(seq_raw))
+                            if not bounds_label in Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["all"]:
+                                Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["all"][bounds_label]={}
+                            if do_homo:
+                                score,norm=OU.get_homology_score(seq_raw,seq_ref_raw,local=local)
+                                Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["all"][str(0)+'_'+str(len(seq_ref_raw))+'_&_'+str(0)+'_'+str(len(seq_raw))]['Homology']=str(score)
+                                Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["all"][str(0)+'_'+str(len(seq_ref_raw))+'_&_'+str(0)+'_'+str(len(seq_raw))]['Homology_ratio']=str(norm)
 
                             for val_type in val_types_seq:
                                 val_ref=SeqProp.get_values(ref_id,"all",str(0)+'_'+str(len(seq_ref_raw)),val_type)
@@ -166,6 +182,7 @@ if __name__=="__main__":
                             bound_match,match_score,bounds_not_folded,bounds_not_folded_ref=OU.find_matching_folded_domains(bounds,bounds_ref,seq_raw,seq_ref_raw)
                             Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["FDs"]={}
                             for m in range(len(bound_match)):
+                                print(bound_match[m])
                                 Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["FDs"][bound_match[m]]={}
                                 Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["FDs"][bound_match[m]]['Homology']=str(match_score[m][0])
                                 Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["FDs"][bound_match[m]]['Homology_ratio']=str(match_score[m][1])
@@ -185,8 +202,6 @@ if __name__=="__main__":
                                 seq_ref=seq_ref_raw[bounds_not_folded_ref[m,0]:bounds_not_folded_ref[m,1]]
                                 seq_oth=seq_raw[bounds_not_folded[m,0]:bounds_not_folded[m,1]]
 
-
-
                                 score,norm=OU.get_homology_score(seq_ref,seq_oth,local)
                                 bounds_label=str(bounds_not_folded_ref[m,0])+'_'+str(bounds_not_folded_ref[m,1])+'_&_'+str(bounds_not_folded[m,0])+'_'+str(bounds_not_folded[m,1])
 
@@ -201,10 +216,5 @@ if __name__=="__main__":
                                         val_ref=SeqProp.get_values(ref_id,"IDRs",bounds_label.split('_&_')[0],val_type)
                                         val_oth=SeqProp.get_values(seq_id,"IDRs",bounds_label.split('_&_')[1],val_type)
                                         Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["IDRs"][bounds_label][val_type]=str(val_oth-val_ref)
-                            # Here I should only compare IDRs that correspond to NFDs
-                            # This means for every couple of NFDs, check that they each correspond to an IDR
-                            # If they do, save the ratio fo the ensemble predictions into the homology json
-                            # From here on, we will recombine the IDRs
-
     with open(homologies_file,'w') as f:
         json.dump(Sequence_homology_all,f)
