@@ -10,17 +10,14 @@ server = "https://rest.ensembl.org/"
 
 if __name__=="__main__":
     ################## Parser declaration ######################
-    parser = argparse.ArgumentParser(description="""Checks the orthologs of a gene name list.\n
-    The user needs to specify an original species name, corresponding to the gene name list, and a reference specie, which may be used for 
-    homology comparison, in other steps. Additional species may be given, but those two first are required.\n
-    Species name must follow the id in gProfiler (https://biit.cs.ut.ee/gprofiler/page/organism-list).\n
-    The output is a file containing the gene name and gene IDs for all species, and that is required to use subsequent programs.""")
+    parser = argparse.ArgumentParser(description="""Checks the orthologs for a file containing a list of gene names. The user needs to specify an original species name, corresponding to the gene name list, and a number of additional species may be used for 
+    homology comparison, in subsequent algorithm.\nSpecies name must follow the id in gProfiler (https://biit.cs.ut.ee/gprofiler/page/organism-list). This program output an orthology file, a gene name file and a sequences files, all in json format.""")
     parser.add_argument("--gene_file","-f",help='Name of test file containing the name of the genes in the "original" species in the first column, other columns are ignored.')
-    parser.add_argument("--original_specie","-os",help="Name of the species corresponding to the gene names provided in the input file. Must respect the naming convention in gProfiler (i.e. the id on https://biit.cs.ut.ee/gprofiler/page/organism-list )")
-    parser.add_argument("--additional_species","-as",help="Additional species",default=[],nargs='+')
+    parser.add_argument("--original_specie","-os",help="Name of the species corresponding to the gene names provided in the input file. Must respect the naming convention in gProfiler (i.e. the id on https://biit.cs.ut.ee/gprofiler/page/organism-list ).This option can take multiple arguments.")
+    parser.add_argument("--additional_species","-as",help="Additional species. Can take multiple arguments.",default=[],nargs='+')
     parser.add_argument("--orthology_file","-of",help='Name of the orthology database json output file. Default is Orthology.json')
     parser.add_argument("--sequences_file","-sf",help='Name of the sequences database json output file. Default is Sequences.json')
-    parser.add_argument("--name_file","-nf",help='Name of the names database json output file. Default is Names.json')
+    parser.add_argument("--names_file","-nf",help='Name of the names database json output file. Default is Names.json')
     args = parser.parse_args()
 
     if args.gene_file :
@@ -41,8 +38,8 @@ if __name__=="__main__":
     else :
         sequences_file='Sequences.json'
 
-    if args.name_file :
-        name_file=args.name_file
+    if args.names_file :
+        name_file=args.names_file
 
     else :
         name_file='Names.json'
@@ -65,10 +62,6 @@ if __name__=="__main__":
 
     dictionary_organisms_gprofiler_inv=dict(zip(dictionary_organisms_gprofiler.values(), dictionary_organisms_gprofiler.keys()))
 
-    # Very important from Patricia, : if mutations are found in every organism, then likely not disease related
-    # Should look at cancer mutations
-    # Should look at AF2 fold homology
-    # Should look at prediction of conformational ensemble
     organisms_types=[]
     organisms_all=[original_organism]+other_organism
     ind_org=0

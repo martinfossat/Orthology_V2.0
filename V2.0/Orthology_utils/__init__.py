@@ -2,7 +2,6 @@ import json
 import qcan_utils as QC
 import Fossat_utils as FU
 import numpy as np
-
 import skbio
 class Seq_Prop_Manager:
     def __init__(self,filename):
@@ -184,49 +183,64 @@ def get_bounds_inverted(bounds,seq):
     bounds_inv[-1]+=[len(seq)]
 
     return np.array(bounds_inv)
-def get_top_x_pct(score_list,top_fraction,names=[]):
+def get_top_x_pct(score_list,len_ratio,top_fraction,names=[]):
     score_list=np.array(score_list)
+    len_ratio=np.array(len_ratio)
     nans_bool=np.invert(np.isnan(score_list))
-    temp_orth_top=np.array(score_list)[nans_bool]
+    temp_orth_top=score_list[nans_bool]
     top_ind_top=int(np.ceil(len(temp_orth_top)*(1-top_fraction)))
     args_top=np.argsort(score_list)[min(top_ind_top,len(temp_orth_top)-1):]
     if names!=[]:
         out_name=names[args_top[-1]]
     else:
         out_name=None
-    return score_list[args_top],out_name
+    return score_list[args_top],len_ratio[args_top],out_name
 
 def clean_seq(seq) :
     seq = seq.replace('*', '')
     seq = seq.replace('U', '')
     seq = seq.replace('X', '')
     return seq
-def get_all_homologies(ref_orga,orth_ref,label,specie,save_homo,min_len_ratio,top_iso_fraction):
+def get_all_homologies(ref_orga,orth_ref,label,specie,save_homo,min_len_ratio,top_iso_fraction,factor_length_ratio=False):
     save_temp_ids=[]
-    save_temp=[]
+    save_temp_score=[]
+    save_len_ratio=[]
     for orth in save_homo[ref_orga][specie][orth_ref]:
-        temp=[]
+        temp_score=[]
+        temp_len_ratio=[]
         for prot_ref in save_homo[ref_orga][specie][orth_ref][orth]:
             for prot in save_homo[ref_orga][specie][orth_ref][orth][prot_ref]:
-                temp_region=[]
-                # names_iso_temp=[]
-
+                temp_score_region=[]
+                temp_len_ratio_region=[]
+                if not label in save_homo[ref_orga][specie][orth_ref][orth][prot_ref][prot]:
+                    continue
                 for region in save_homo[ref_orga][specie][orth_ref][orth][prot_ref][prot][label]:
+
                     reg1=np.array(region.split('_&_')[0].split('_'),dtype=int)
                     len1=reg1[1]-reg1[0]
                     reg2=np.array(region.split('_&_')[1].split('_'),dtype=int)
                     len2=reg2[1]-reg2[0]
-
-                    if min(len1,len2)/max(len1,len2)<min_len_ratio:
-                        print(len1,len2)
+                    len_ratio=min(len1,len2)/max(len1,len2)
+                    if len_ratio<min_len_ratio:
                         continue
-                    temp_region+=[float(
-                        save_homo[ref_orga][specie][orth_ref][orth][prot_ref][prot][label][region]['Homology_ratio'])]
-                if len(temp_region)!=0:
-                    temp+=[np.mean(temp_region)]
-        save_temp+=[np.mean(get_top_x_pct(temp,top_iso_fraction)[0])]
+                    temp_len_ratio_region+=[len_ratio]
+                    if factor_length_ratio:
+                        factor=len_ratio
+                    else :
+                        factor=1.
+                    temp_score_region+=[factor*float(save_homo[ref_orga][specie][orth_ref][orth][prot_ref][prot][label][region]['Homology_ratio'])]
+
+                if len(temp_score_region)!=0:
+                    temp_score+=[np.mean(temp_score_region)]
+                    temp_len_ratio+=[np.mean(temp_len_ratio_region)]
+        if len(temp_score)==0:
+            continue
+        temp_score,temp_len_ratio,todel=get_top_x_pct(temp_score,temp_len_ratio,top_iso_fraction)
+        save_temp_score+=[np.mean(temp_score)]
+        save_len_ratio+=[np.mean(temp_len_ratio)]
         save_temp_ids+=[orth]
-    return save_temp,save_temp_ids
+
+    return save_temp_score,save_len_ratio,save_temp_ids
 
 def plot_2d_hist(x,y,xlabel,ylabel,x_ticks,y_ticks,name,binwidth):
     import matplotlib
@@ -237,8 +251,7 @@ def plot_2d_hist(x,y,xlabel,ylabel,x_ticks,y_ticks,name,binwidth):
         "text.usetex":True,
         "pgf.preamble":
             r'\usepackage{color}',
-        "font.family":"Times New Roman"}
-    import matplotlib
+        "font.family":"Arial"}
     matplotlib.rcParams.update(pgf_with_latex)
     import matplotlib.pyplot as plt
 
@@ -262,7 +275,8 @@ def plot_2d_hist(x,y,xlabel,ylabel,x_ticks,y_ticks,name,binwidth):
     plt.subplot2grid((8,8),(1,7),colspan=1,rowspan=7)
     bins=np.arange(0,np.nanmax(x)+binwidth,binwidth)
     plt.ylim(0,np.nanmax(x))
-    plt.yticks([],[])
+    label_empty=['' for i in range(len(x_ticks))]
+    plt.yticks(x_ticks,label_empty)
     plt.xticks([],[])
     plt.hist(x,bins=bins,orientation='horizontal',histtype='step',color='g')
 
@@ -270,7 +284,8 @@ def plot_2d_hist(x,y,xlabel,ylabel,x_ticks,y_ticks,name,binwidth):
     bins=np.arange(0,np.nanmax(y)+binwidth,binwidth)
     plt.xlim(0,np.nanmax(y))
     plt.yticks([],[])
-    plt.xticks([],[])
+    label_empty=['' for i in range(len(y_ticks))]
+    plt.xticks(y_ticks,label_empty)
     plt.hist(y,bins=bins,histtype='step',color='g')
     plt.savefig(name)
     plt.close()
@@ -285,8 +300,7 @@ def plot_hist(save_all_prop,region_types,species,label_dic,bin_properties):
         "text.usetex":True,
         "pgf.preamble":
             r'\usepackage{color}',
-        "font.family":"Times New Roman"}
-    import matplotlib
+        "font.family":"Arial"}
     matplotlib.rcParams.update(pgf_with_latex)
     import matplotlib.pyplot as plt
 
@@ -349,8 +363,7 @@ def plot_bar_charts(save_all_prop,region_types,species,ensembles,name,label_dic_
         "text.usetex":True,
         "pgf.preamble":
             r'\usepackage{color}',
-        "font.family":"Times New Roman"}
-    import matplotlib
+        "font.family":"Arial"}
     matplotlib.rcParams.update(pgf_with_latex)
     import matplotlib.pyplot as plt
 

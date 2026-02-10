@@ -19,21 +19,16 @@ import Orthology_utils as OU
 AA_type,AA_scores=FU.get_self_homology_score()
 if __name__=="__main__":
     ################## Parser declaration ######################
-    parser = argparse.ArgumentParser(description="""Checks the orthologs of a gene name list.\n
-    The user needs to specify an original species name, corresponding to the gene name list, and a reference specie, which may be used for 
-    homology comparison, in other steps. Additional species may be given, but those two first are required.\n
-    Species name must follow the id in gProfiler (https://biit.cs.ut.ee/gprofiler/page/organism-list).\n
-    The output is a file containing the gene name and gene IDs for all species, and that is required to use subsequent programs.""")
+    parser = argparse.ArgumentParser(description="""Compares sequences of orthologs between a reference species and a number of other species. 
+    Comparisons includes comparing sequence features, sequence ensemble prediction and charge sequence features, as well as calcualting the homology between sequences.""")
     parser.add_argument("--orthology_file","-of",help='File name where the file is a json file containing created by the Ortholog program')
     parser.add_argument("--sequences_file", "-sf",help='Name of the sequences database json output file. Default is Sequences.json')
     parser.add_argument("--properties_file", "-pf",help='Name of the sequence properties file. Default is Sequence_properties.json')
     parser.add_argument("--homologies_file","-hf",help='Name of the homology database file. Default is Gene_homologies.json')
-    parser.add_argument("--min_len_fraction","-mif",help='Minimum length fraction. Best to keep 0, build the database for everything, and discard later')
-    parser.add_argument("--reference_specie","-rs",help="Reference specie")
-    parser.add_argument("--additional_species","-as",help="Additional species",default=[],nargs='+')
-    #parser.add_argument("--max_size_factor","-msf",help="Factor for the length of the ortholog array compared to the input gene list size. Must be integer, bigger number is slower, but if many ortholog exists, may be necessary")
-    #parser.add_argument("--delete_cross_refs","-dcr",help="Whether gene name that share an ortholog should be delete, so they don't appear twice.  1 is delete, 0 is keep.")
-    parser.add_argument("--do_homo","-dh",help="Whether tp calculate the homology score. 1 is on, 0 is off. Default is 1",default=1)
+    parser.add_argument("--min_len_fraction","-mlf",help='Minimum length fraction. Best to keep 0, build the database for everything, and discard later, however, if the algorithm runs too slowly, this is a simple way of speeding it up.')
+    parser.add_argument("--reference_specie","-rs",help="Name of the reference specie to which sequences are compared")
+    parser.add_argument("--additional_species","-as",help="Name of additional species which are compared to the reference specie.",default=[],nargs='+')
+    parser.add_argument("--do_homo","-dh",help="Whether to calculate the homology score. 1 is on, 0 is off. Default is 1 (on)")
     args = parser.parse_args()
 
 
@@ -182,7 +177,6 @@ if __name__=="__main__":
                             bound_match,match_score,bounds_not_folded,bounds_not_folded_ref=OU.find_matching_folded_domains(bounds,bounds_ref,seq_raw,seq_ref_raw)
                             Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["FDs"]={}
                             for m in range(len(bound_match)):
-                                print(bound_match[m])
                                 Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["FDs"][bound_match[m]]={}
                                 Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["FDs"][bound_match[m]]['Homology']=str(match_score[m][0])
                                 Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["FDs"][bound_match[m]]['Homology_ratio']=str(match_score[m][1])

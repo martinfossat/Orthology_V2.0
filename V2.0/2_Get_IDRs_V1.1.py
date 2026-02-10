@@ -43,14 +43,8 @@ if __name__=="__main__":
     Seq_Prop={}
     N1=0
     for orths in Orthology_all:
-        #print(100*N1/len(Orthology_all))
         N1+=1
         for orga in Orthology_all[orths]:
-            # if len(Orthology_all[orths][orga])>1:
-            #     print(len(Orthology_all[orths][orga]))
-            #     if orga=='drerio':
-            #         input("AA")
-            # continue
             for gene_id in Orthology_all[orths][orga]:
                 for seq_id in Orthology_all[orths][orga][gene_id]:
                     seq=OU.clean_seq(Sequences_all[seq_id])
