@@ -169,17 +169,10 @@ AA_type,AA_scores=FU.get_self_homology_score()
 def get_bounds_inverted(bounds,seq):
     if len(bounds)==0:
         return np.array([[0,len(seq)]])
-    # if bounds[0][0]==0:
-    #     # bounds_inv=[]
-    #     bounds_inv=[[0,0]]
-    # else :
     bounds_inv=[[0]]
     for b in range(len(bounds)):
-
         bounds_inv[-1]+=[bounds[b][0]]
-        # if bounds[b][1]!=len(seq):
         bounds_inv+=[[bounds[b][1]]]
-    # if bounds[b][1]!=len(seq):
     bounds_inv[-1]+=[len(seq)]
 
     return np.array(bounds_inv)

@@ -1,14 +1,16 @@
 ########################################################################################################################
+########################################################################################################################
 ############################################  PROGRAM DESCRIPTIONS  ####################################################
+########################################################################################################################
 ########################################################################################################################
 
 These programs use command line parsers to specify execution options. Each option can be specified using either the long
- (starts with two dashes) or short flag for the options. Flag can be necessary (no default), or optional, in which case
+ (starts with two dashes) or short flag for the options. Flags can be necessary (no default), or optional, in which case
  a default value is used. In the case of input optional file name, if no name is provided, a file with the default name
   must exist in the parent directory. When specified, multiple option can be given for a single flag. All specie names
   must respect the naming convention in gProfiler (i.e. the id on https://biit.cs.ut.ee/gprofiler/page/organism-list )
 
-############################################  1_Get_orthologs  ####################################################
+#############################                       1_Get_orthologs                        #############################
 ######## Description
 This programs takes a list of genes for a given species, and outputs the orthologs for other species, as well as
 retrieves the sequences associated with each pair of orthologs.
@@ -93,27 +95,50 @@ Plot the sequence comparison between two species with regard to a third referenc
 -tif --top_iso_fraction    Top fraction of isoforms that are kept using overall homology as a metric. 0 is only most
                            homologous, 1 is all.
 -tof --top_orth_fraction   Top fraction of orthologs that are kept using overall homology as a metric. 0 is only most
-                           omologous, 1 is all.
+                           homologous, 1 is all.
 -mlr --min_len_ratio       Mimimun length ratio between the species and the reference species for orthologs to be
                            plotted
 -bw  --bin_width           Width of the bins for histograms. Default is 0.2
 -flr --factor_len_ratio    Whether to multiply the homology by the length ratio. Can be 1 (on) or 0 (off). Default is 0
 
-
+########################################################################################################################
 ########################################################################################################################
 ###################################################  DATABASES  ########################################################
 ########################################################################################################################
+########################################################################################################################
 There are two distinct databases that the algorithm works with :
-    -The orthology databaset, which contains data about the orthologs and name of each genes
-    -The sequence database, which contains data about the sequence properties
-    -The homology database, which contains all data about sequence comparisons between homologs
-
-
-
-
-
-
-
+    -The orthology database : contains data about the orthologs and name of each genes
+    -The sequence database : contains the sequence for each isoform ID
+    -The homology database : contains all data about sequence comparisons between homologs
+    -The names database : contains the gene names for each gene ID
 
 #############ORTHOLOGY DATABASE#############
 Structure :
+Original specie gene name > Specie > Gene ID > Protein isoform ID
+
+#############SEQUENCE DATABASE#############
+Structure :
+Protein isoform ID > Amino acid sequence
+
+#############HOMOLOGY DATABASE#############
+reference specie > Compared specie > reference ortholog ID > Compared ortholog ID > reference protein isoform ID >
+compared protein ioform ID > domain annotation > compared region pair > compared value type > value
+
+#############NAMES DATABASE#############
+Gene ID > Gene name
+
+########################################################################################################################
+########################################################################################################################
+###################################################  DEPENDENCIES  #####################################################
+########################################################################################################################
+########################################################################################################################
+Necessary python3 modules for this are :
+Import name     Full name       Link
+json            json            https://github.com/python/cpython/blob/3.14/Lib/json/__init__.py
+argparse        argparse        https://pypi.org/project/argparse/
+requests        requests        https://pypi.org/project/requests/
+numpy           numpy           https://pypi.org/project/numpy/
+metapredict     metapredict     https://pypi.org/project/metapredict/
+matplotlib      matplotlib      https://pypi.org/project/matplotlib/
+skbio           scikit-bio      https://pypi.org/project/scikit-bio/
+sparrow         sparrow         https://sparrow-online.com/

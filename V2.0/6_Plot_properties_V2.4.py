@@ -1,18 +1,5 @@
 import json
 import Fossat_utils as FU
-import matplotlib
-matplotlib.use("pgf")
-from matplotlib.backends.backend_pgf import FigureCanvasPgf
-matplotlib.backend_bases.register_backend('pdf', FigureCanvasPgf)
-pgf_with_latex = {
-    "text.usetex": True,
-    "pgf.preamble":
-        r'\usepackage{color}',
-    "font.family": "Times New Roman" }
-import matplotlib
-matplotlib.rcParams.update(pgf_with_latex)
-import matplotlib.pyplot as plt
-import numpy as np
 import os
 import argparse
 import Orthology_utils as OU
