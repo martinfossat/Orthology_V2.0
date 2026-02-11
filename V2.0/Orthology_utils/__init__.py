@@ -135,8 +135,7 @@ def find_matching_folded_domains(bounds,bounds_ref,seq_oth,seq_ref,length_max_ra
 
     bounds_not_folded_ref=get_bounds_inverted(bounds_all_ref,seq_ref)
     bounds_not_folded=get_bounds_inverted(bounds_all_oth,seq_oth)
-    # if len(bounds_not_folded_ref)!=len(bounds_not_folded):
-    #     print("Problem")
+
     temp_ref=[]
     temp=[]
     for i in range(len(bounds_not_folded_ref)):
@@ -198,9 +197,12 @@ def get_all_homologies(ref_orga,orth_ref,label,specie,save_homo,min_len_ratio,to
     save_temp_ids=[]
     save_temp_score=[]
     save_len_ratio=[]
+
     for orth in save_homo[ref_orga][specie][orth_ref]:
         temp_score=[]
         temp_len_ratio=[]
+        temp_iso_id_pair=[]
+
         for prot_ref in save_homo[ref_orga][specie][orth_ref][orth]:
             for prot in save_homo[ref_orga][specie][orth_ref][orth][prot_ref]:
                 temp_score_region=[]
@@ -208,7 +210,6 @@ def get_all_homologies(ref_orga,orth_ref,label,specie,save_homo,min_len_ratio,to
                 if not label in save_homo[ref_orga][specie][orth_ref][orth][prot_ref][prot]:
                     continue
                 for region in save_homo[ref_orga][specie][orth_ref][orth][prot_ref][prot][label]:
-
                     reg1=np.array(region.split('_&_')[0].split('_'),dtype=int)
                     len1=reg1[1]-reg1[0]
                     reg2=np.array(region.split('_&_')[1].split('_'),dtype=int)
@@ -226,13 +227,17 @@ def get_all_homologies(ref_orga,orth_ref,label,specie,save_homo,min_len_ratio,to
                 if len(temp_score_region)!=0:
                     temp_score+=[np.mean(temp_score_region)]
                     temp_len_ratio+=[np.mean(temp_len_ratio_region)]
+                    temp_iso_id_pair+=[prot_ref+'_'+prot]
         if len(temp_score)==0:
-            continue
-        temp_score,temp_len_ratio,todel=get_top_x_pct(temp_score,temp_len_ratio,top_iso_fraction)
-        save_temp_score+=[np.mean(temp_score)]
-        save_len_ratio+=[np.mean(temp_len_ratio)]
-        save_temp_ids+=[orth]
+            save_temp_score+=[float('NaN')]
+            save_len_ratio+=[float('NaN')]
+            save_temp_ids+=[orth+'__N/A_N/A']
 
+        else :
+            temp_score,temp_len_ratio,top_iso_pair=get_top_x_pct(temp_score,temp_len_ratio,top_iso_fraction,names=temp_iso_id_pair)
+            save_temp_score+=[np.mean(temp_score)]
+            save_len_ratio+=[np.mean(temp_len_ratio)]
+            save_temp_ids+=[orth+'__'+top_iso_pair]
     return save_temp_score,save_len_ratio,save_temp_ids
 
 def plot_2d_hist(x,y,xlabel,ylabel,x_ticks,y_ticks,name,binwidth):
@@ -404,3 +409,24 @@ def plot_bar_charts(save_all_prop,region_types,species,ensembles,name,label_dic_
         plt.tight_layout()
         plt.savefig('Plots/'+region_type+"/Ensemble_properties_"+name+".pdf")
         plt.close()
+
+def load_file(file_name,silent=False):
+    try :
+        with open(file_name,'r') as f :
+            data=f.readlines()
+            f.close()
+    except :
+        if silent==False:
+            print("Could not open "+file_name)
+    return data
+def read_file(file_name,silent=False,split='') :
+    data=load_file(file_name,silent=silent)
+    len1=len(data)
+    arr=[[] for i in range(len1)]
+    for i in range(len1):
+        if split!='':
+            temp=data[i].split(split)
+        else :
+            temp=data[i].split()
+        arr[i]+=temp
+    return arr

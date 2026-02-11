@@ -39,7 +39,6 @@ if __name__=="__main__":
             else :
                 print("Wrong value for factor_length_ratio. Please use 0 and 1")
                 quit()
-
     else:
         factor_len_ratio=False
 
@@ -131,7 +130,6 @@ if __name__=="__main__":
 
     region_types=['all','IDRs','FDs']
 
-
     for label in region_types:
         FU.check_and_create_rep('Plots/Homology/'+label)
         save_all_compare=[]
@@ -149,6 +147,8 @@ if __name__=="__main__":
 
             save_temp_top,temp_len_ratio_top,save_temp_ids_top=OU.get_all_homologies(ref_orga,orth_ref,label,specie_top,save_homo,min_len_ratio,top_iso_fraction,factor_length_ratio=factor_len_ratio)
             save_temp_norm,temp_len_ratio_norm,save_temp_ids_norm=OU.get_all_homologies(ref_orga,orth_ref,label,specie_norm,save_homo,min_len_ratio,top_iso_fraction,factor_length_ratio=factor_len_ratio)
+
+
 
             save_temp_top,temp_len_ratio_top,best_top_id=OU.get_top_x_pct(save_temp_top,temp_len_ratio_top,top_ortholog_fraction,names=save_temp_ids_top)
             save_temp_norm,temp_len_ratio_norm,best_norm_id=OU.get_top_x_pct(save_temp_norm,temp_len_ratio_norm,top_ortholog_fraction,names=save_temp_ids_norm)
@@ -227,9 +227,28 @@ if __name__=="__main__":
         f=open(name_file)
         save_names=json.load(f)
 
-        # Wrtting the sorted homology comaprison
-        W=ref_orga+'_id\t'+ref_orga+'_name\t'+specie_top+'_id\t'+specie_top+'_name\t'+specie_top+'_score\t'+specie_norm+'_id\t'+specie_norm+'_name\t'+specie_norm+'_score\t'+specie_top+'/'+specie_norm+'\n'
-        for i in range(len(save_all_ids_ref)):
-            W+=str(save_all_ids_ref[i])+'\t'+str(save_names[save_all_ids_ref[i]])+'\t'+str(save_all_ids_top[i])+'\t'+str(save_names[save_all_ids_top[i]])+'\t'+str(save_all_compare_top[i])+'\t'+str(save_all_ids_norm[i])+'\t'+str(save_names[save_all_ids_norm[i]])+'\t'+str(save_all_compare_norm[i])+'\t'+str(save_all_compare[i])+'\n'
+        # Writing the sorted homology comparison
+        W_tmp_ref=ref_orga+'_id\t'+ref_orga+'_name'
+        W_tmp_top=specie_top+'_id\t'+specie_top+'_name\t'+'Isoform_pair\t'+specie_top+'_score'
+        W_tmp_norm=specie_norm+'_id\t'+specie_norm+'_name\t'+'Isoform_pair\t'+specie_norm+'_score'
 
+        W=W_tmp_ref+'\t'+W_tmp_top+'\t'+W_tmp_norm+'\t'+specie_top+'/'+specie_norm+'\n'
+        #W=ref_orga+'_id\t'+ref_orga+'_name\t'+specie_top+'_id\t'+specie_top+'_name\t'+specie_top+'_score\t'+specie_norm+'_id\t'+specie_norm+'_name\t'+specie_norm+'_score\t'+specie_top+'/'+specie_norm+'\n'
+        # There is one line per reference gene, implying the reference gene is the same for each other organism, but
+        # However, the reference isoform used may not be the same in the two organism, so we put it twice
+
+        for i in range(len(save_all_ids_ref)):
+            W_tmp_ref=str(save_all_ids_ref[i])+'\t'+str(save_names[save_all_ids_ref[i]])
+
+            split_tmp=save_all_ids_top[i].split('__')
+            gene_id=split_tmp[0]
+            W_tmp_top=str(gene_id)+'\t'+str(save_names[gene_id])+'\t'+split_tmp[1]+'\t'+str(save_all_compare_top[i])
+
+
+            split_tmp=save_all_ids_norm[i].split('__')
+            gene_id=split_tmp[0]
+            W_tmp_norm=str(gene_id)+'\t'+str(save_names[gene_id])+'\t'+split_tmp[1]+'\t'+str(save_all_compare_norm[i])
+
+            #W+=str(save_all_ids_ref[i])+'\t'+str(save_names[save_all_ids_ref[i]])+'\t'+str(gene_id_top)+'\t'+str(save_names[save_all_ids_top[i]])+'\t'+str(save_all_compare_top[i])+'\t'+str(save_all_ids_norm[i])+'\t'+str(save_names[save_all_ids_norm[i]])+'\t'+str(save_all_compare_norm[i])+'\t'+str(save_all_compare[i])+'\n'
+            W+=W_tmp_ref+'\t'+W_tmp_top+'\t'+W_tmp_norm+'\t'+str(save_all_compare[i])+'\n'
         FU.write_file('Sorted_ids_'+label+'.txt',W)

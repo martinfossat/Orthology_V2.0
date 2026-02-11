@@ -29,7 +29,20 @@ if __name__=="__main__":
     parser.add_argument("--reference_specie","-rs",help="Name of the reference specie to which sequences are compared")
     parser.add_argument("--additional_species","-as",help="Name of additional species which are compared to the reference specie.",default=[],nargs='+')
     parser.add_argument("--do_homo","-dh",help="Whether to calculate the homology score. 1 is on, 0 is off. Default is 1 (on)")
+    parser.add_argument("--align_type","-at",help="Alignment type for the homology. Can be NW (Needleman–Wunsch, i.e. global) or SW (Smith–Waterman, i.e. local). Default is SW.")
     args = parser.parse_args()
+
+
+    if args.align_type :
+        if args.align_type=='SW':
+            local=True
+        elif args.align_type=='NW':
+            local=False
+        else :
+            print("Invalid argument for align_type")
+            quit()
+    else :
+        local=True
 
 
     if args.do_homo :
@@ -104,7 +117,7 @@ if __name__=="__main__":
 
     f=open(sequences_file)
     Sequences_all=json.load(f)
-    local=True
+
     SeqProp=OU.Seq_Prop_Manager(properties_file)
 
     # I should load the existing file in case one wants to do a difference comparison

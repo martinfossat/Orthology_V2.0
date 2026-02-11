@@ -1,4 +1,3 @@
-import Fossat_utils as FU
 import numpy as np
 import requests
 import json
@@ -72,7 +71,7 @@ if __name__=="__main__":
             quit(1)
     server="https://rest.ensembl.org/"
 
-    raw_data=FU.read_file(filename)
+    raw_data=OU.read_file(filename)
     data=np.array([raw_data[i][0] for i in range(len(raw_data))])
 
     save_gene_name=np.empty((len(data)*4,len(organisms_all)),dtype="<U30")

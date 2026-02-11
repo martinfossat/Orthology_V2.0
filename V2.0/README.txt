@@ -1,5 +1,21 @@
 ########################################################################################################################
 ########################################################################################################################
+###############################################  ORTHOLOGY_UTILS  ######################################################
+########################################################################################################################
+########################################################################################################################
+The following programs rely on the location of the Orthology_utils folder to be known by the python environment. This
+means updating the PYTHONPATH. To do this :
+# On windows :
+Go to : Settings > Advance system Settings > Environment variables and add PYTHONPATH to the user variables with a path
+for the Orthology_utils folder. Only one reference to PYTHONPATH must exist, if multiple packages, uses ";" to delimit
+their location.
+# On Linux :
+Open the ~/.bashrc file, a hidden file in the home folder of the user. Add the line :
+export PYTHONPATH=$PYTHONPATH:/path/to/Orthology_utils
+# Alternatively, you can add the path to Orthology utils to the PYTHONPATH of your IDE
+
+########################################################################################################################
+########################################################################################################################
 ############################################  PROGRAM DESCRIPTIONS  ####################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -80,6 +96,8 @@ homology between sequences.
 -mlf --min_len_fraction    Minimum length fraction. Best to keep 0, build the database for everything, and discard later
                            , however, if the algorithm runs too slowly, this is a simple way of speeding it up.
 -dh  --do_homo             Whether to calculate the homology score. 1 is on, 0 is off. Default is 1 (on).
+-at  --align_type          Alignment type for the homology. Can be NW (Needleman–Wunsch, i.e. global) or SW
+                           (Smith–Waterman, i.e. local). Default is SW.
 
 ###########################################  5_Plots_comparison ##############################################
 ######## Description
@@ -96,7 +114,7 @@ Plot the sequence comparison between two species with regard to a third referenc
                            homologous, 1 is all.
 -tof --top_orth_fraction   Top fraction of orthologs that are kept using overall homology as a metric. 0 is only most
                            homologous, 1 is all.
--mlr --min_len_ratio       Mimimun length ratio between the species and the reference species for orthologs to be
+-mlr --min_len_ratio       Minimum length ratio between the species and the reference species for orthologs to be
                            plotted
 -bw  --bin_width           Width of the bins for histograms. Default is 0.2
 -flr --factor_len_ratio    Whether to multiply the homology by the length ratio. Can be 1 (on) or 0 (off). Default is 0
@@ -134,7 +152,7 @@ Gene ID > Gene name
 ########################################################################################################################
 Necessary python3 modules for this are :
 Import name     Full name       Link
-json            json            https://github.com/python/cpython/blob/3.14/Lib/json/__init__.py
+json            json            https://github.com/python/cpython/blob/3.14/Lib/json
 argparse        argparse        https://pypi.org/project/argparse/
 requests        requests        https://pypi.org/project/requests/
 numpy           numpy           https://pypi.org/project/numpy/
@@ -142,3 +160,7 @@ metapredict     metapredict     https://pypi.org/project/metapredict/
 matplotlib      matplotlib      https://pypi.org/project/matplotlib/
 skbio           scikit-bio      https://pypi.org/project/scikit-bio/
 sparrow         sparrow         https://sparrow-online.com/
+
+To install all on linux type :
+
+pip install -r requirements.txt

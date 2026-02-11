@@ -1,0 +1,8 @@
+json
+argparse
+requests
+numpy
+metapredict
+matplotlib
+scikit-bio
+sparrow

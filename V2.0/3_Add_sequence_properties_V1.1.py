@@ -1,17 +1,6 @@
 import json
-import matplotlib
 import qcan_utils as QC
 import os
-matplotlib.use("pgf")
-from matplotlib.backends.backend_pgf import FigureCanvasPgf
-matplotlib.backend_bases.register_backend('pdf', FigureCanvasPgf)
-pgf_with_latex = {
-    "text.usetex": True,
-    "pgf.preamble":
-        r'\usepackage{color}',
-    "font.family": "Arial" }
-import matplotlib
-matplotlib.rcParams.update(pgf_with_latex)
 import argparse
 import numpy as np
 import Orthology_utils as OU
