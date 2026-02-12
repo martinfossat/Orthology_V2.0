@@ -12,6 +12,7 @@ pgf_with_latex={
 matplotlib.rcParams.update(pgf_with_latex)
 import matplotlib.pyplot as plt
 import numpy as np
+from .File_tools import *
 
 def plot_2d_hist(x,y,xlabel,ylabel,x_ticks,y_ticks,name,binwidth):
 
@@ -58,22 +59,10 @@ def plot_2d_hist(x,y,xlabel,ylabel,x_ticks,y_ticks,name,binwidth):
 
 
 def plot_hist(save_all_prop,region_types,species,label_dic,bin_properties):
-    # import matplotlib
-    # matplotlib.use("pgf")
-    # from matplotlib.backends.backend_pgf import FigureCanvasPgf
-    # matplotlib.backend_bases.register_backend('pdf',FigureCanvasPgf)
-    # pgf_with_latex={
-    #     "text.usetex":True,
-    #     "pgf.preamble":
-    #         r'\usepackage{color}',
-    #     "font.family":"Arial"}
-    # matplotlib.rcParams.update(pgf_with_latex)
-    # import matplotlib.pyplot as plt
-
     colors=[plt.cm.gist_rainbow(i/(len(species))) for i in range(len(species))]
     type_ensemble=[]
     for region_type in region_types:
-        FU.check_and_create_rep('Plots/'+region_type)
+        check_and_create_rep('Plots/'+region_type)
         for prop in save_all_prop:
             if not prop in bin_properties:
                 continue
@@ -138,7 +127,7 @@ def plot_bar_charts(save_all_prop,region_types,species,ensembles,name,label_dic_
     type_ensemble=[]
     for region_type in region_types:
         i=0
-        FU.check_and_create_rep('Plots/'+region_type)
+        check_and_create_rep('Plots/'+region_type)
         N_offset=1
         for prop in save_all_prop:
             if not prop in ensembles:
