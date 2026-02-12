@@ -1,6 +1,5 @@
 import json
 import Fossat_utils as FU
-import os
 import argparse
 import Orthology_utils as OU
 
@@ -26,13 +25,6 @@ if __name__=="__main__":
         properties_file=args.properties_file
     else :
         properties_file='Sequence_properties.json'
-
-    file_path=os.path.realpath(__file__)
-
-    with open(os.path.dirname(file_path)+"/g_Profiler_Organisms_names_dic.json", "r") as fp:
-        dictionary_organisms_gprofiler = json.load(fp)
-
-    dictionary_organisms_gprofiler_inv=dict(zip(dictionary_organisms_gprofiler.values(), dictionary_organisms_gprofiler.keys()))
 
     f=open(orthology_file)
     orthology=json.load(f)
