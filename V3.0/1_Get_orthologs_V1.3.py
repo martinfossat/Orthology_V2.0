@@ -54,13 +54,8 @@ if __name__=="__main__":
     else :
         other_organism=[]
 
-    file_path=os.path.realpath(__file__)
-
-    with open(os.path.dirname(file_path)+"/g_Profiler_Organisms_names_dic.json", "r") as fp:
-        dictionary_organisms_gprofiler = json.load(fp)
-
-    dictionary_organisms_gprofiler_inv=dict(zip(dictionary_organisms_gprofiler.values(), dictionary_organisms_gprofiler.keys()))
-
+    dictionary_organisms_gprofiler=OU.get_orga_dic()
+    dictionary_organisms_gprofiler_inv=dict(zip(dictionary_organisms_gprofiler.values(),dictionary_organisms_gprofiler.keys()))
     organisms_types=[]
     organisms_all=[original_organism]+other_organism
     ind_org=0
@@ -69,6 +64,9 @@ if __name__=="__main__":
         if not dictionary_organisms_gprofiler_inv[organisms_all[i]] :
             print('One of the organisms does not match the name used in gProfiler, please only use gProfiler ID names.')
             quit(1)
+
+
+
     server="https://rest.ensembl.org/"
 
     raw_data=OU.read_file(filename)

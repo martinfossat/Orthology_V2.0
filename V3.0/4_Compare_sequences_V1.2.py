@@ -88,7 +88,7 @@ if __name__=="__main__":
     if args.homologies_file :
         homologies_file=args.homologies_file
     else :
-        homologies_file='Gene_homologies.json'
+        homologies_file='Homology.json'
 
     if args.reference_specie :
         ref_org=args.reference_specie
@@ -99,16 +99,12 @@ if __name__=="__main__":
     if args.additional_species :
         other_organism=args.additional_species
     else :
-        other_organism=[]
 
-    file_path=os.path.realpath(__file__)
+        print("You need at least two ogranism to compare")
+        quit()
 
-    with open(os.path.dirname(file_path)+"/g_Profiler_Organisms_names_dic.json", "r") as fp:
-        dictionary_organisms_gprofiler = json.load(fp)
 
     clean_sequence=True
-
-    dictionary_organisms_gprofiler_inv=dict(zip(dictionary_organisms_gprofiler.values(), dictionary_organisms_gprofiler.keys()))
 
     all_orga=[ref_org]+other_organism
 
