@@ -1,8 +1,6 @@
-import skbio
-import json
+
+
 import matplotlib
-import Fossat_utils as FU
-import os
 matplotlib.use("pgf")
 from matplotlib.backends.backend_pgf import FigureCanvasPgf
 matplotlib.backend_bases.register_backend('pdf', FigureCanvasPgf)
@@ -14,9 +12,14 @@ pgf_with_latex = {
 import matplotlib
 matplotlib.rcParams.update(pgf_with_latex)
 import argparse
+
+import json
+import Fossat_utils as FU
 import Orthology_utils as OU
 
+
 AA_type,AA_scores=FU.get_self_homology_score()
+
 if __name__=="__main__":
     ################## Parser declaration ######################
     parser = argparse.ArgumentParser(description="""Compares sequences of orthologs between a reference species and a number of other species. 
@@ -88,7 +91,7 @@ if __name__=="__main__":
     if args.homologies_file :
         homologies_file=args.homologies_file
     else :
-        homologies_file='Gene_homologies.json'
+        homologies_file='Homology.json'
 
     if args.reference_specie :
         ref_org=args.reference_specie
@@ -99,16 +102,12 @@ if __name__=="__main__":
     if args.additional_species :
         other_organism=args.additional_species
     else :
-        other_organism=[]
 
-    file_path=os.path.realpath(__file__)
+        print("You need at least two ogranism to compare")
+        quit()
 
-    with open(os.path.dirname(file_path)+"/g_Profiler_Organisms_names_dic.json", "r") as fp:
-        dictionary_organisms_gprofiler = json.load(fp)
 
     clean_sequence=True
-
-    dictionary_organisms_gprofiler_inv=dict(zip(dictionary_organisms_gprofiler.values(), dictionary_organisms_gprofiler.keys()))
 
     all_orga=[ref_org]+other_organism
 

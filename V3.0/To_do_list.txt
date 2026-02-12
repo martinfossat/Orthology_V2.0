@@ -1,0 +1,18 @@
+#### Important ####
+Check that we can run everything
+    # Check problem with Kappa (crash )
+
+
+Talk about the paralog issue
+
+Make a wasy rto recover underdefined genes (that exist only in one specie)
+
+#### Minor ####
+Add colormap choice as a command line argument
+
+
+Add option to find undefined orthologs
+
+
+
+

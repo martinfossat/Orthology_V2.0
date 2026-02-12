@@ -1,10 +1,8 @@
 import json
 import metapredict as MP
-from sparrow.predictors import batch_predict
 import argparse
 import os
 import Orthology_utils as OU
-
 
 if __name__=="__main__":
     ################## Parser declaration ######################
@@ -12,13 +10,8 @@ if __name__=="__main__":
     parser.add_argument("--orthology_file","-of",help='Name of the orthology file')
     parser.add_argument("--properties_file","-pf",help='Name of the sequence properties file. Default is Sequence_properties.json')
     parser.add_argument("--sequences_file", "-sf",help='Name of the sequences database json output file. Default is Sequences.json')
-    # parser.add_argument("--original_specie","-os",help="Original specie")
-    # parser.add_argument("--additional_species","-as",help="Additional species",default=[],nargs='+')
-    # parser.add_argument("--delete_x","-dx",help="Replace symbol X in proteins sequences by an emtpy character")
-    # parser.add_argument("--delete_u","-du",help="Replace symbol U in proteins sequences by an emtpy character")
-    # parser.add_argument("--delete_any","-da",help="Replace symbol * in proteins sequences by an emtpy character")
-    # parser.add_argument("--max_size_factor","-msf",help="Factor for the length of the ortholog array compared to the input gene list size. Must be integer, bigger number is slower, but if many orhtolog exists, may be necessary")
-    args = parser.parse_args()
+    # parser.add_argument("--species","-as",help="Additional species",default=[],nargs='+')
+    args=parser.parse_args()
 
     if args.orthology_file :
         orthology_file=args.orthology_file
@@ -35,38 +28,6 @@ if __name__=="__main__":
     else :
         sequences_file='Sequences.json'
 
-    # if args.delete_x :
-    #     try :
-    #         X_is_None=bool(args.delete_x)
-    #     except :
-    #         print("Invalid option for replacing X")
-    #         X_is_None=True
-    # else :
-    #     X_is_None=True
-    #
-    # if args.delete_u :
-    #     try :
-    #         U_is_None=bool(args.delete_u)
-    #     except :
-    #         print("Invalid option for replacing X")
-    #         U_is_None=True
-    # else :
-    #     U_is_None=True
-    #
-    # if args.delete_any :
-    #     try :
-    #         Any_is_None=bool(args.delete_any)
-    #     except :
-    #         print("Invalid option for replacing X")
-    #         Any_is_None=True
-    # else :
-    #     Any_is_None=True
-
-    X_is_None=True
-    U_is_None=True
-    Any_is_None=True
-    # Whether to delete the X (undefined AAs)
-
     file_path=os.path.realpath(__file__)
     with open(os.path.dirname(file_path)+"/g_Profiler_Organisms_names_dic.json", "r") as fp:
         dictionary_organisms_gprofiler = json.load(fp)
@@ -82,23 +43,17 @@ if __name__=="__main__":
     Seq_Prop={}
     N1=0
     for orths in Orthology_all:
-        print(100*N1/len(Orthology_all))
         N1+=1
         for orga in Orthology_all[orths]:
             for gene_id in Orthology_all[orths][orga]:
                 for seq_id in Orthology_all[orths][orga][gene_id]:
-                    seq=Sequences_all[seq_id]
-                    if X_is_None :
-                        seq=seq.replace('X','')
-                    if U_is_None :
-                        seq=seq.replace('U','')
-                    if Any_is_None :
-                        seq=seq.replace('*','')
+                    seq=OU.clean_seq(Sequences_all[seq_id])
 
                     Seq_Prop[seq_id]={}
                     Seq_Prop[seq_id]['all']={}
                     Seq_Prop[seq_id]['all'][str(0)+'_'+str(len(seq))]={}
                     Seq_Prop[seq_id]['IDRs']={}
+
                     dis_bounds=MP.predict_disorder_domains(seq).disordered_domain_boundaries
                     fd_bounds=OU.get_bounds_inverted(dis_bounds,seq)
                     for bounds in dis_bounds:

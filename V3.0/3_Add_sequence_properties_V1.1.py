@@ -1,5 +1,4 @@
 import json
-import os
 import argparse
 import numpy as np
 import Orthology_utils as OU
@@ -94,11 +93,7 @@ if __name__=="__main__":
     else :
         sequences_file='Sequences.json'
 
-    file_path=os.path.realpath(__file__)
-    with open(os.path.dirname(file_path)+"/g_Profiler_Organisms_names_dic.json", "r") as fp:
-        dictionary_organisms_gprofiler = json.load(fp)
     clean_sequence=True
-    dictionary_organisms_gprofiler_inv=dict(zip(dictionary_organisms_gprofiler.values(), dictionary_organisms_gprofiler.keys()))
 
     f=open(filename)
     Orthology_all=json.load(f)
@@ -135,6 +130,8 @@ if __name__=="__main__":
                         seq_raw=OU.clean_seq(seq_raw)
                     for label in labels:
                         bounds,bounds_labels=SeqProp.get_bounds(seq_id,label)
+                        if bounds is None:
+                            continue
                         for i in range(len(bounds)):
                             if bounds[i,0]==bounds[i,1]:
                                 continue

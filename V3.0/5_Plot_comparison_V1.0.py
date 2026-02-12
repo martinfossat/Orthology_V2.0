@@ -12,7 +12,6 @@ pgf_with_latex = {
 matplotlib.rcParams.update(pgf_with_latex)
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 import argparse
 import Orthology_utils as OU
 
@@ -119,11 +118,7 @@ if __name__=="__main__":
     FU.check_and_create_rep('Plots')
     FU.check_and_create_rep('Plots/Homology')
 
-    file_path=os.path.realpath(__file__)
-    with open(os.path.dirname(file_path)+"/g_Profiler_Organisms_names_dic.json", "r") as fp:
-        dictionary_organisms_gprofiler = json.load(fp)
 
-    dictionary_organisms_gprofiler_inv=dict(zip(dictionary_organisms_gprofiler.values(), dictionary_organisms_gprofiler.keys()))
     print('Loading file')
     f=open(homologies_file)
     save_homo=json.load(f)
@@ -227,6 +222,10 @@ if __name__=="__main__":
         f=open(name_file)
         save_names=json.load(f)
 
+
+
+
+
         # Writing the sorted homology comparison
         W_tmp_ref=ref_orga+'_id\t'+ref_orga+'_name'
         W_tmp_top=specie_top+'_id\t'+specie_top+'_name\t'+'Isoform_pair\t'+specie_top+'_score'
@@ -252,3 +251,7 @@ if __name__=="__main__":
             #W+=str(save_all_ids_ref[i])+'\t'+str(save_names[save_all_ids_ref[i]])+'\t'+str(gene_id_top)+'\t'+str(save_names[save_all_ids_top[i]])+'\t'+str(save_all_compare_top[i])+'\t'+str(save_all_ids_norm[i])+'\t'+str(save_names[save_all_ids_norm[i]])+'\t'+str(save_all_compare_norm[i])+'\t'+str(save_all_compare[i])+'\n'
             W+=W_tmp_ref+'\t'+W_tmp_top+'\t'+W_tmp_norm+'\t'+str(save_all_compare[i])+'\n'
         FU.write_file('Sorted_ids_'+label+'.txt',W)
+
+
+
+
