@@ -1,7 +1,6 @@
 import json
 import metapredict as MP
 import argparse
-import os
 import Orthology_utils as OU
 
 if __name__=="__main__":
@@ -21,11 +20,6 @@ if __name__=="__main__":
     else :
         sequences_file='Sequences.json'
 
-    file_path=os.path.realpath(__file__)
-    with open(os.path.dirname(file_path)+"/g_Profiler_Organisms_names_dic.json", "r") as fp:
-        dictionary_organisms_gprofiler = json.load(fp)
-    dictionary_organisms_gprofiler_inv=dict(zip(dictionary_organisms_gprofiler.values(), dictionary_organisms_gprofiler.keys()))
-
     f=open(sequences_file)
     Sequences_all=json.load(f)
 
@@ -34,13 +28,14 @@ if __name__=="__main__":
 
     for seq_id in Sequences_all:
         seq=OU.clean_seq(Sequences_all[seq_id])
+
         Seq_Prop[seq_id]={}
         Seq_Prop[seq_id]['all']={}
         Seq_Prop[seq_id]['all'][str(0)+'_'+str(len(seq))]={}
         Seq_Prop[seq_id]['IDRs']={}
+
         dis_bounds=MP.predict_disorder_domains(seq).disordered_domain_boundaries
         fd_bounds=OU.get_bounds_inverted(dis_bounds,seq)
-
         for bounds in dis_bounds:
             label_bounds=str(bounds[0])+'_'+str(bounds[1])
             Seq_Prop[seq_id]['IDRs'][label_bounds]={}
