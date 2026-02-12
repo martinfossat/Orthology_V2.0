@@ -27,13 +27,6 @@ if __name__=="__main__":
     else :
         properties_file='Sequence_properties.json'
 
-    file_path=os.path.realpath(__file__)
-
-    with open(os.path.dirname(file_path)+"/g_Profiler_Organisms_names_dic.json", "r") as fp:
-        dictionary_organisms_gprofiler = json.load(fp)
-
-    dictionary_organisms_gprofiler_inv=dict(zip(dictionary_organisms_gprofiler.values(), dictionary_organisms_gprofiler.keys()))
-
     f=open(orthology_file)
     orthology=json.load(f)
     # This contains the precomputed sequence feature, ensemble properties and charge properties
