@@ -1,6 +1,5 @@
 import json
 import Fossat_utils as FU
-import os
 import argparse
 import Orthology_utils as OU
 

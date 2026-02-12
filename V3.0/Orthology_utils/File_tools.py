@@ -1,3 +1,15 @@
+import os
+
+
+def check_and_create_rep(directory,silent=True):
+    try :
+        os.makedirs(directory)
+    except :
+        if os.path.exists(directory) and not silent:
+            print('Could not create directory ('+directory+') : already exists')
+        if not os.path.exists(directory):
+            print('Error creating directory '+directory)
+
 
 def load_file(file_name,silent=False):
     try :
