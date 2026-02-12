@@ -92,19 +92,21 @@ def query_profiler(organism_org,organism_target,gene_name,max_wait=30):
     import time
     wait=0
     while wait<max_wait:
-        r2=requests.post(url='https://biit.cs.ut.ee/gprofiler/api/orth/orth/',
-                         json={'organism':organism_org,'target':organism_target,'query':gene_name})
-        out=r2.json()
-
         try:
             r2=requests.post(url='https://biit.cs.ut.ee/gprofiler/api/orth/orth/',
                              json={'organism':organism_org,'target':organism_target,'query':gene_name})
+
             out=r2.json()
             break
         except:
             time.sleep(1)
             wait+=1
             print('Waited '+str(wait)+' seconds')
+
+    if wait>=max_wait:
+        print("Maxed out on server waiting time. Either your connection if unstable, or you have been temporarly blocked to many recent connections.")
+        quit()
+
     return out
 
 def get_all_ids(Orthology_all):
