@@ -1,5 +1,3 @@
-
-
 import matplotlib
 matplotlib.use("pgf")
 from matplotlib.backends.backend_pgf import FigureCanvasPgf
@@ -105,7 +103,6 @@ if __name__=="__main__":
 
         print("You need at least two ogranism to compare")
         quit()
-
 
     clean_sequence=True
 
@@ -222,5 +219,6 @@ if __name__=="__main__":
                                         val_ref=SeqProp.get_values(ref_id,"IDRs",bounds_label.split('_&_')[0],val_type)
                                         val_oth=SeqProp.get_values(seq_id,"IDRs",bounds_label.split('_&_')[1],val_type)
                                         Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["IDRs"][bounds_label][val_type]=str(val_oth-val_ref)
+
     with open(homologies_file,'w') as f:
         json.dump(Sequence_homology_all,f)
