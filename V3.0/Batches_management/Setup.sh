@@ -33,8 +33,8 @@ echo python3 ${SCRIPT_LOC}/1_Get_orthologs_V1.3.py -f ./Batches/Input_names/batc
 echo python3 ${SCRIPT_LOC}/2_Get_IDRs_V2.0.py -of ${ortho_file} -sf ${seq_file} -pf ${seq_prop_file} >> run.batch
 echo python3 ${SCRIPT_LOC}/3_Add_sequence_properties_V1.1.py -pf ${seq_prop_file} -sf ${seq_file} -of ${ortho_file}  >> run.batch
 echo python3 ${SCRIPT_LOC}/4_Compare_sequences_V1.3.py -of ${ortho_file} -hf ${homo_file} -sf ${seq_file} -pf ${seq_prop_file} -rs hsapiens -as drerio mmusculus >> run.batch
-#echo python3 ${SCRIPT_LOC}+/5_Plot_comparison_V1.0.py -nf ${names_file} -hf ${homo_file} -rs hsapiens -as drerio mmusculus >> run.batch
-#echo python3 ${SCRIPT_LOC}+/6_Plot_properties_V2.4.py -f ./Batches/Homology_scores/N_${i}_All_homology.json -rs hsapiens  -as drerio mmusculus >> run.batch
+#echo python3 ${SCRIPT_LOC}/5_Plot_comparison_V1.0.py -nf ${names_file} -hf ${homo_file} -rs hsapiens -as drerio mmusculus >> run.batch
+#echo python3 ${SCRIPT_LOC}/6_Plot_properties_V2.4.py -f ./Batches/Homology_scores/N_${i}_All_homology.json -rs hsapiens  -as drerio mmusculus >> run.batch
 
 sbatch -J N_${i} run.batch
 sleep 1
