@@ -1,7 +1,6 @@
 import numpy as np
 import requests
 import json
-import os
 import argparse
 import Orthology_utils as OU
 
