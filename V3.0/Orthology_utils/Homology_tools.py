@@ -2,11 +2,8 @@ import skbio
 import numpy as np
 
 global AAs_type,AAs_scores
-
-def get_self_homology_score():
-    AAs=np.array(["A","C","D","E","F","G","H","I","K","L","M","N","P","Q","R","S","T","V","W","Y"])
-    scores=np.array([5,13,8,6,8,8,10,5,6,5,7,7,10,7,7,5,5,5,15,8])
-    return AAs,scores
+AAs=np.array(["A","C","D","E","F","G","H","I","K","L","M","N","P","Q","R","S","T","V","W","Y"])
+AA_scores=np.array([5,13,8,6,8,8,10,5,6,5,7,7,10,7,7,5,5,5,15,8])
 
 def find_matching_folded_domains(bounds,bounds_ref,seq_oth,seq_ref,length_max_ratio=0.8,homology_min=0.4):
     bound_match=[]
@@ -57,9 +54,9 @@ def get_homology_score(seq_ref,seq,local):
 
 def get_self_alignement(seq_test) :
     count=0
-    for aa in range(len(AA_types)):
+    for aa in range(len(AAs)):
         for s in range(len(seq_test)):
-            count+=(str(seq_test[s])==AA_types[aa])*AA_scores[aa]
+            count+=(str(seq_test[s])==AAs[aa])*AA_scores[aa]
     return count
 
 def get_bounds_inverted(bounds,seq):
