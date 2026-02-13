@@ -174,7 +174,7 @@ if __name__=="__main__":
         xlabel='Normalized homology ratio '+specie_top+' to '+ref_orga
         name='Plots/Homology/'+label+'/2D_hist_2_species.pdf'
         OU.plot_2d_hist(save_all_compare_norm,save_all_compare_top,xlabel,ylabel,x_ticks,y_ticks,name,binwidth)
-
+        
         x_ticks=np.round(np.arange(0, np.nanmax(save_all_compare_top)+tick_sep, tick_sep),3)
         y_ticks =np.round(np.arange(0, np.nanmax(save_all_compare)+tick_sep, tick_sep),3)
         xlabel='Normalized homology ratio '+specie_top+' to '+ref_orga
