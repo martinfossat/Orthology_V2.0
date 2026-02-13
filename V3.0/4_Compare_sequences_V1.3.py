@@ -12,11 +12,8 @@ matplotlib.rcParams.update(pgf_with_latex)
 import argparse
 
 import json
-import Fossat_utils as FU
 import Orthology_utils as OU
 
-
-AA_type,AA_scores=FU.get_self_homology_score()
 
 if __name__=="__main__":
     ################## Parser declaration ######################

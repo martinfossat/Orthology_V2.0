@@ -152,7 +152,6 @@ Gene ID > Gene name
 ########################################################################################################################
 Necessary python3 modules for this are :
 Import name     Full name       Link
-json            json            https://github.com/python/cpython/blob/3.14/Lib/json
 argparse        argparse        https://pypi.org/project/argparse/
 requests        requests        https://pypi.org/project/requests/
 numpy           numpy           https://pypi.org/project/numpy/

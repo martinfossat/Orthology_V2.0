@@ -1,5 +1,4 @@
 import json
-import Fossat_utils as FU
 import argparse
 import Orthology_utils as OU
 
@@ -14,7 +13,7 @@ if __name__=="__main__":
     parser.add_argument("--properties_file", "-pf",help='Name of the sequence properties file. Default is Sequence_properties.json')
     args = parser.parse_args()
 
-    FU.check_and_create_rep('Plots')
+    OU.check_and_create_rep('Plots')
 
     if args.orthology_file :
         orthology_file=args.orthology_file
