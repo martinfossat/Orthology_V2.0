@@ -1,5 +1,6 @@
 source ~/.bashrc
 batch_size=25
+start_batch=0
 file_name=Gene_names.txt
 SCRIPT_LOC='../'
 
@@ -14,7 +15,7 @@ mkdir Batches/Standard_output
 awk -v size="${batch_size}" '{print $1 > ("./Batches/Input_names/batch_" int((NR-1)/size) ".txt")}' ${file_name}
 N_batches=$(( ($(wc -l < "$file_name") + batch_size - 1) / batch_size ))
 
-for((i=0;i<${N_batches};i++));
+for((i=${start_batch};i<${N_batches};i++));
 do
 seq_file=./Batches/Sequences/N_${i}.json
 ortho_file=./Batches/Ortho/N_${i}.json

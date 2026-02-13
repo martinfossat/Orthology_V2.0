@@ -1,6 +1,5 @@
 import os
 
-
 def check_and_create_rep(directory,silent=True):
     try :
         os.makedirs(directory)
