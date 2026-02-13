@@ -119,6 +119,7 @@ Plot the sequence comparison between two species with regard to a third referenc
 -bw  --bin_width           Width of the bins for histograms. Default is 0.2
 -flr --factor_len_ratio    Whether to multiply the homology by the length ratio. Can be 1 (on) or 0 (off). Default is 0
 
+
 ########################################################################################################################
 ########################################################################################################################
 ###################################################  DATABASES  ########################################################
