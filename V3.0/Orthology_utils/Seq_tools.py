@@ -1,8 +1,9 @@
-import numpy as np
 import json
 from .MEDOC_tools import *
 import time
 import requests
+
+
 class Seq_Prop_Manager:
     def __init__(self,filename):
         self.filename=filename
