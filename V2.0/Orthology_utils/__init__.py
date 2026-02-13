@@ -1,6 +1,5 @@
 import json
 import qcan_utils as QC
-import Fossat_utils as FU
 import numpy as np
 import skbio
 
@@ -61,6 +60,7 @@ class Seq_Prop_Manager:
 
     def add_ensemble_properties(self,seq_id,seq,label,bounds_label):
         from sparrow.predictors import batch_predict
+
         if seq_id not in self.SeqProp:
             self.SeqProp[seq_id]={label:{}}
         if label not in self.SeqProp[seq_id]:

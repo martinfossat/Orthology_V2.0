@@ -109,7 +109,6 @@ if __name__=="__main__":
         pH=np.arange(pH_range[0],pH_range[1]+0.01,0.01,dtype=np.longdouble)
         OU.initialize_additive_DF_array_MEDOC_public()
 
-
     force_pred=False
     labels=["all","IDRs","FDs","NFDs"]
 
