@@ -115,9 +115,7 @@ if __name__=="__main__":
         quit(1)
 
     OU.check_and_create_rep('Plots')
-    OU.check_and_create_rep('Plots/Homology')
-
-
+    
     print('Loading file')
     f=open(homologies_file)
     save_homo=json.load(f)
@@ -125,7 +123,8 @@ if __name__=="__main__":
     region_types=['all','IDRs','FDs']
 
     for label in region_types:
-        OU.check_and_create_rep('Plots/Homology/'+label)
+        OU.check_and_create_rep('Plots/'+label)
+        OU.check_and_create_rep('Plots/'+label+'/Homology/')
         save_all_compare=[]
         save_all_ids_ref=[]
         save_all_ids_top=[]
@@ -171,21 +170,21 @@ if __name__=="__main__":
         y_ticks =np.round(np.arange(0,1+tick_sep, tick_sep),3)
         ylabel='Normalized homology ratio '+specie_norm+' to '+ref_orga
         xlabel='Normalized homology ratio '+specie_top+' to '+ref_orga
-        name='Plots/Homology/'+label+'/2D_hist_2_species.pdf'
+        name='Plots/'+label+'/Homology//2D_hist_2_species.pdf'
         OU.plot_2d_hist(save_all_compare_norm,save_all_compare_top,xlabel,ylabel,x_ticks,y_ticks,name,binwidth)
         
         x_ticks=np.round(np.arange(0, np.nanmax(save_all_compare_top)+tick_sep, tick_sep),3)
         y_ticks =np.round(np.arange(0, np.nanmax(save_all_compare)+tick_sep, tick_sep),3)
         xlabel='Normalized homology ratio '+specie_top+' to '+ref_orga
         ylabel='Normalized homology ratio ('+specie_top+'/'+specie_norm+')'
-        name='Plots/Homology/'+label+'/2D_hist_top.pdf'
+        name='Plots/'+label+'/Homology//2D_hist_top.pdf'
         OU.plot_2d_hist(save_all_compare,save_all_compare_top,xlabel,ylabel,x_ticks,y_ticks,name,binwidth)
 
         x_ticks=np.round(np.arange(0, np.nanmax(save_all_compare_norm)+tick_sep, tick_sep),3)
         y_ticks =np.round(np.arange(0, np.nanmax(save_all_compare)+tick_sep, tick_sep),3)
         xlabel='Normalized homology ratio '+specie_norm+' to '+ref_orga
         ylabel='Normalized homology ratio ('+specie_top+'/'+specie_norm+')'
-        name='Plots/Homology/'+label+'/2D_hist_norm.pdf'
+        name='Plots/'+label+'/Homology//2D_hist_norm.pdf'
         OU.plot_2d_hist(save_all_compare,save_all_compare_norm,xlabel,ylabel,x_ticks,y_ticks,name,binwidth)
 
         # Plotting 1D histograms
@@ -197,7 +196,7 @@ if __name__=="__main__":
         plt.legend()
         plt.ylabel("Number of occurences")
         plt.xlabel("Normalized homology to "+ref_orga)
-        plt.savefig('Plots/Homology/'+label+'/Hist_both_species.pdf')
+        plt.savefig('Plots/'+label+'/Homology//Hist_both_species.pdf')
         plt.close()
 
         bins = np.arange(0, np.nanmax(save_all_compare)+binwidth, binwidth)
@@ -206,7 +205,7 @@ if __name__=="__main__":
         plt.hist(save_all_compare,bins=bins,histtype='step',color='k')
         plt.ylabel("Number of occurences")
         plt.xlabel('Normalized homology to '+ref_orga+' ratio ('+specie_top+'/'+specie_norm+')')
-        plt.savefig('Plots/Homology/'+label+'/Hist_ratio_'+specie_top+'_'+specie_norm+'.pdf')
+        plt.savefig('Plots/'+label+'/Homology//Hist_ratio_'+specie_top+'_'+specie_norm+'.pdf')
         plt.close()
 
         # Sorting for the text file
@@ -220,10 +219,6 @@ if __name__=="__main__":
         # Getting the names of the genes from the file
         f=open(name_file)
         save_names=json.load(f)
-
-
-
-
 
         # Writing the sorted homology comparison
         W_tmp_ref=ref_orga+'_id\t'+ref_orga+'_name'
