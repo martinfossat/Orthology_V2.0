@@ -6,7 +6,8 @@ import numpy as np
 
 if __name__=="__main__":
     ################## Parser declaration ######################
-    parser = argparse.ArgumentParser(description="""This programs takes the orhtology database and chck which species have an orthologs""")
+
+    parser = argparse.ArgumentParser(description="""This program takes the orhtology database and checks which species have an orthologs""")
     parser.add_argument("--species","-s",help='Specie to check the existence of orthologs for',nargs='+',default=[])
     args = parser.parse_args()
 
