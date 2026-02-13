@@ -193,3 +193,5 @@ python3 5_Plot_comparison_V1.0.py -rs hsapiens -ts drerio -ns mmusculus
 python3 6_Plot_properties_V2.4.py
 
 An example of batches execution for a slurm submission system is given in Batches_Setup/Setup.sh
+You can use the Recombine_batches_json_V1.0.py -n with the nax number of batches to recombine the batches into a single
+file per database type
