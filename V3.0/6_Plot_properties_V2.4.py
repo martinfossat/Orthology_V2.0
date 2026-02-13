@@ -1,20 +1,15 @@
 import json
-import Fossat_utils as FU
 import argparse
 import Orthology_utils as OU
 
 if __name__=="__main__":
     ################## Parser declaration ######################
-    parser = argparse.ArgumentParser(description="""Checks the orthologs of a gene name list.\n
-    The user needs to specify an original species name, corresponding to the gene name list, and a reference specie, which may be used for 
-    homology comparison, in other steps. Additional species may be given, but those two first are required.\n
-    Species name must follow the id in gProfiler (https://biit.cs.ut.ee/gprofiler/page/organism-list).\n
-    The output is a file containing the gene name and gene IDs for all species, and that is required to use subsequent programs.""")
+    parser = argparse.ArgumentParser(description="""This program reads the Orthology and Sequence properties files and plot all relevant properties individually for each species.""")
     parser.add_argument("--orthology_file","-of",help='Name of the orthology database json output file. Default is Orthology.json')
     parser.add_argument("--properties_file", "-pf",help='Name of the sequence properties file. Default is Sequence_properties.json')
     args = parser.parse_args()
 
-    FU.check_and_create_rep('Plots')
+    OU.check_and_create_rep('Plots')
 
     if args.orthology_file :
         orthology_file=args.orthology_file

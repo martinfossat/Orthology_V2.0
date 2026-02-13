@@ -76,7 +76,7 @@ MEDOC (Isoelectric point and Net Charge, although mostly valid for disordered re
 -fp  --force_pred          Whether to force ensemble calculations on every domain types. By default, the ensemble
                            prediction are limited to all non-folded domains. 0 if off, 1 is on. Default is 0 (off)
 -pHv --pH_val              Values at which to calculate the effective charge. Can have multiple arguments.
-###########################################  4_Compare_sequences  ##############################################
+###############################################  4_Compare_sequences  ##################################################
 ######## Description
 Compares sequences of orthologs between a reference species and a number of other species. Comparisons includes
 comparing sequence features, sequence ensemble prediction and charge sequence features, as well as calculating the
@@ -99,7 +99,7 @@ homology between sequences.
 -at  --align_type          Alignment type for the homology. Can be NW (Needleman–Wunsch, i.e. global) or SW
                            (Smith–Waterman, i.e. local). Default is SW.
 
-###########################################  5_Plots_comparison ##############################################
+################################################  5_Plots_comparison ###################################################
 ######## Description
 Plot the sequence comparison between two species with regard to a third reference specie.
 ######## Arguments
@@ -118,6 +118,22 @@ Plot the sequence comparison between two species with regard to a third referenc
                            plotted
 -bw  --bin_width           Width of the bins for histograms. Default is 0.2
 -flr --factor_len_ratio    Whether to multiply the homology by the length ratio. Can be 1 (on) or 0 (off). Default is 0
+
+################################################  6_Plot_properties ####################################################
+######## Description
+This program reads the Orthology and Sequence properties files and plot all relevant properties individually for each
+species.
+######## Arguments
+#### Required
+-of  --orthology_file      Name of the orthology database json output file. Default is Orthology.json
+-pf  --properties_file     Name of the sequence properties file. Default is Sequence_properties.json
+
+################################################  7_Check_existence ####################################################
+######## Description
+This program takes the orhtology database and checks which species have an orthologs
+######## Arguments
+#### Required
+-s  --species      Names of the species to be checked.
 
 ########################################################################################################################
 ########################################################################################################################
@@ -152,7 +168,6 @@ Gene ID > Gene name
 ########################################################################################################################
 Necessary python3 modules for this are :
 Import name     Full name       Link
-json            json            https://github.com/python/cpython/blob/3.14/Lib/json
 argparse        argparse        https://pypi.org/project/argparse/
 requests        requests        https://pypi.org/project/requests/
 numpy           numpy           https://pypi.org/project/numpy/

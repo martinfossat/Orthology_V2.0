@@ -1,5 +1,4 @@
 import json
-import Fossat_utils as FU
 import matplotlib
 matplotlib.use("pgf")
 from matplotlib.backends.backend_pgf import FigureCanvasPgf
@@ -115,8 +114,8 @@ if __name__=="__main__":
         print("You must specify a top specie")
         quit(1)
 
-    FU.check_and_create_rep('Plots')
-    FU.check_and_create_rep('Plots/Homology')
+    OU.check_and_create_rep('Plots')
+    OU.check_and_create_rep('Plots/Homology')
 
 
     print('Loading file')
@@ -126,7 +125,7 @@ if __name__=="__main__":
     region_types=['all','IDRs','FDs']
 
     for label in region_types:
-        FU.check_and_create_rep('Plots/Homology/'+label)
+        OU.check_and_create_rep('Plots/Homology/'+label)
         save_all_compare=[]
         save_all_ids_ref=[]
         save_all_ids_top=[]
@@ -250,7 +249,7 @@ if __name__=="__main__":
 
             #W+=str(save_all_ids_ref[i])+'\t'+str(save_names[save_all_ids_ref[i]])+'\t'+str(gene_id_top)+'\t'+str(save_names[save_all_ids_top[i]])+'\t'+str(save_all_compare_top[i])+'\t'+str(save_all_ids_norm[i])+'\t'+str(save_names[save_all_ids_norm[i]])+'\t'+str(save_all_compare_norm[i])+'\t'+str(save_all_compare[i])+'\n'
             W+=W_tmp_ref+'\t'+W_tmp_top+'\t'+W_tmp_norm+'\t'+str(save_all_compare[i])+'\n'
-        FU.write_file('Sorted_ids_'+label+'.txt',W)
+        OU.write_file('Sorted_ids_'+label+'.txt',W)
 
 
 

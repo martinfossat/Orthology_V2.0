@@ -9,6 +9,15 @@ def check_and_create_rep(directory,silent=True):
             print('Could not create directory ('+directory+') : already exists')
         if not os.path.exists(directory):
             print('Error creating directory '+directory)
+def write_file(file_name,W,silent=True):
+    try :
+        with open(file_name,'w') as f :
+            f.writelines(W)
+            f.close()
+        if not silent :
+            print(file_name+" written.")
+    except :
+        print("Could not open "+file_name)
 
 
 def load_file(file_name,silent=False):
