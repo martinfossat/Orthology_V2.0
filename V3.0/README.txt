@@ -185,11 +185,11 @@ pip install -r requirements.txt
 ###############################################  EXECUTION EXAMPLE  ####################################################
 ########################################################################################################################
 ########################################################################################################################
-1_Get_orthologs_V1.3.py -os drerio -as mmusculus hsapiens
-2_Get_IDRs_V2.0.py
-3_Add_sequence_properties_V1.1.py
-4_Compare_sequences_V1.3.py -rs hsapiens -as mmusculus drerio
-5_Plot_comparison_V1.0.py
-6_Plot_properties_V2.4.py
+python3 1_Get_orthologs_V1.3.py -os drerio -as mmusculus hsapiens -f batch_39.txt
+python3 2_Get_IDRs_V2.0.py
+python3 3_Add_sequence_properties_V1.1.py
+python3 4_Compare_sequences_V1.3.py -rs hsapiens -as mmusculus drerio
+python3 5_Plot_comparison_V1.0.py -rs hsapiens -ts drerio -ns mmusculus
+python3 6_Plot_properties_V2.4.py
 
-
+An example of batches execution for a slurm submission system is given in Batches_Setup/Setup.sh
