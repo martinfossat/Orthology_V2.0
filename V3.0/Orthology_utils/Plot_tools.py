@@ -15,7 +15,8 @@ import numpy as np
 from .File_tools import *
 
 def plot_2d_hist(x,y,xlabel,ylabel,x_ticks,y_ticks,name,binwidth):
-
+    if len(x)==0 or len(y)==0:
+        return None
     plt.figure(figsize=(4,4))
     plt.subplot2grid((8,8),(1,0),colspan=7,rowspan=7)
 
