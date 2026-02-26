@@ -91,8 +91,8 @@ if __name__=="__main__":
             r=requests.get(server+ext,headers=headers)
 
             if not r.ok:
-                r.raise_for_status()
-                quit()
+                #r.raise_for_status()
+                continue
 
             decoded=r.json()
 

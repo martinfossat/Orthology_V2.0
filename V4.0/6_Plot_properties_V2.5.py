@@ -1,6 +1,6 @@
 import json
 import argparse
-import numpy as np
+import os
 import Orthology_utils as OU
 
 
@@ -49,9 +49,24 @@ if __name__=="__main__":
     parser.add_argument("--annotation_file","-af",help='Name of the gene annotation json file. Default is Gene_annotations.json')
     parser.add_argument("--annotation_type","-at",help='Name of the annotation type (PC, BP, MF, SML, SAL). Type -at list_types to get details',default=[],nargs='+')
     parser.add_argument("--annotation_names","-an",help='Annotation names for each corresponding annotation type.',default=[],nargs='+')
+    parser.add_argument("--plot_list", "-pl", help='List genes to be plotted separately. Genes must be in columns, each first element of the column being the label for the gene list.')
+
     args = parser.parse_args()
 
     OU.check_and_create_rep('Plots')
+    if args.plot_list :
+        plot_list_file=args.plot_list
+        data=OU.load_file(plot_list_file)
+        plot_list=[[]for j in range(len(data[0].split('\t')))]
+        plot_list_name=[data[0].split('\t')[j].replace('\n','') for j in range(len(data[0].split('\t')))]
+        for i in range(1,len(data)):
+            temp=data[i].split('\t')
+            for j in range(len(temp)):
+                to_add=temp[j].replace('\n','')
+                if to_add!='':
+                    plot_list[j]+=[temp[j].replace('\n','')]
+    else :
+        plot_list_name=[]
 
     if args.orthology_file :
         orthology_file=args.orthology_file
@@ -100,10 +115,12 @@ if __name__=="__main__":
         annotation[annotation_type[i]]+=[annotation_names[i]]
     del annotation_type,annotation_names
 
-    print('Loading gene annotations file')
-    f=open(annotation_file)
-    Gene_annotation=json.load(f)
-
+    if os.path.exists(annotation_file):
+        print('Loading gene annotations file')
+        f=open(annotation_file)
+        Gene_annotation=json.load(f)
+    else :
+        Gene_annotation={}
     print('Loading orthology file')
     f=open(orthology_file)
     orthology=json.load(f)
@@ -112,6 +129,9 @@ if __name__=="__main__":
     # This contains the precomputed sequence feature, ensemble properties and charge properties
     f=open(properties_file)
     properties=json.load(f)
+
+
+
 
     region_types=seq_labels
     save_all_prop={}
@@ -145,8 +165,6 @@ if __name__=="__main__":
                             save_all_prop[region_type]={}
 
                         for region in properties[prot_id][region_type]:
-                            # print(len(properties[prot_id][region_type][region]))
-                            # print(properties[prot_id][region_type][region].keys())
                             for prop in props:
                                 if not prop in save_all_prop[region_type]:
                                     save_all_prop[region_type][prop]={}
@@ -157,7 +175,6 @@ if __name__=="__main__":
                                     save_all_prop[region_type][prop][orga]+=[float(properties[prot_id][region_type][region][prop])]
                                 else :
                                     save_all_prop[region_type][prop][orga]+=[float('NaN')]
-
                             # Making the masks
                             for at in annotation:
                                 for an in range(len(annotation[at])):
