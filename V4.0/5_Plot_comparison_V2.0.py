@@ -36,9 +36,23 @@ if __name__=="__main__":
     parser.add_argument("--annotation_file","-af",help='Name of the gene annotation json file. Default is Gene_annotations.json')
     parser.add_argument("--annotation_type","-at",help='Name of the annotation type (PC, BP, MF, SML, SAL). Type -at list_types to get details',default=[],nargs='+')
     parser.add_argument("--annotation_names","-an",help='Annotation names for each corresponding annotation type.',default=[],nargs='+')
-    parser.add_argument("--gene_list","-gl",help='Additional gene list for plotting')
     parser.add_argument("--iso_compare","-ic",help="How to compare isoforms. Option are : MLF (Minimum Length Fraction) Compares all protein isoform that have a pair length ratio above the value specified; MLO (Maximum Length Only) : only compare the longest isoforms between the two species. This is what is done in Ensembl. Default is MLO.")
+    parser.add_argument("--plot_list", "-pl", help='List genes to be plotted separately. Genes must be in columns, each first element of the column being the label for the gene list.')
     args = parser.parse_args()
+
+    if args.plot_list :
+        plot_list_file=args.plot_list
+        data=OU.load_file(plot_list_file)
+        plot_list=[[]for j in range(len(data[0].split('\t')))]
+        plot_list_name=[data[0].split('\t')[j].replace('\n','') for j in range(len(data[0].split('\t')))]
+        for i in range(1,len(data)):
+            temp=data[i].split('\t')
+            for j in range(len(temp)):
+                to_add=temp[j].replace('\n','')
+                if to_add!='':
+                    plot_list[j]+=[temp[j].replace('\n','')]
+    else :
+        plot_list_name=[]
 
     if args.iso_compare :
         if args.iso_compare=='MLO':
@@ -50,8 +64,6 @@ if __name__=="__main__":
             quit()
     else :
         use_MLF=False
-
-
 
     if args.factor_len_ratio:
             if args.factor_len_ratio=='0':
@@ -204,8 +216,6 @@ if __name__=="__main__":
                 # Skip if an ortholog exist in only one of the species that we are comparing
                 continue
 
-
-
             save_temp_top,temp_len_ratio_top,save_temp_ids_top=OU.get_all_homologies(ref_orga,orth_ref,label,specie_top,save_homo,min_len_ratio,top_iso_fraction,factor_length_ratio=factor_len_ratio,MLO_only=not use_MLF)
             save_temp_norm,temp_len_ratio_norm,save_temp_ids_norm=OU.get_all_homologies(ref_orga,orth_ref,label,specie_norm,save_homo,min_len_ratio,top_iso_fraction,factor_length_ratio=factor_len_ratio,MLO_only=not use_MLF)
 
@@ -257,6 +267,8 @@ if __name__=="__main__":
             OU.check_and_create_rep('Plots/'+label+'/Homology/')
             plt.savefig('Plots/'+label+'/Homology/'+at+'.pdf')
 
+
+
         # Getting the names of the genes from the file
         f=open(name_file)
         save_names=json.load(f)
@@ -267,15 +279,9 @@ if __name__=="__main__":
 
         W=W_tmp_ref+'\t'+W_tmp_top+'\t'+W_tmp_norm+'\t'+specie_top+'/'+specie_norm+'\n'
 
-        #W=ref_orga+'_id\t'+ref_orga+'_name\t'+specie_top+'_id\t'+specie_top+'_name\t'+specie_top+'_score\t'+specie_norm+'_id\t'+specie_norm+'_name\t'+specie_norm+'_score\t'+specie_top+'/'+specie_norm+'\n'
-
         # There is one line per reference gene, implying the reference gene is the same for each other organism, but
         # However, the reference isoform used may not be the same in the two organism, so we put it twice
-
         save_all_compare,save_all_ids_top,save_all_ids_norm,save_all_ids_ref,save_all_compare_top,save_all_compare_norm,save_all_len_ratio=AllSeqLab[label].get_all()
-
-
-
         for i in range(len(save_all_ids_ref)):
             W_tmp_ref=str(save_all_ids_ref[i])+'\t'+str(save_names[save_all_ids_ref[i]])
 
@@ -287,8 +293,6 @@ if __name__=="__main__":
             split_tmp=save_all_ids_norm[i].split('__')
             gene_id=split_tmp[0]
             W_tmp_norm=str(gene_id)+'\t'+str(save_names[gene_id])+'\t'+split_tmp[1]+'\t'+str(save_all_compare_norm[i])
-
-            #W+=str(save_all_ids_ref[i])+'\t'+str(save_names[save_all_ids_ref[i]])+'\t'+str(gene_id_top)+'\t'+str(save_names[save_all_ids_top[i]])+'\t'+str(save_all_compare_top[i])+'\t'+str(save_all_ids_norm[i])+'\t'+str(save_names[save_all_ids_norm[i]])+'\t'+str(save_all_compare_norm[i])+'\t'+str(save_all_compare[i])+'\n'
 
             W+=W_tmp_ref+'\t'+W_tmp_top+'\t'+W_tmp_norm+'\t'+str(save_all_compare[i])+'\n'
         OU.write_file('Sorted_ids_'+label+'.txt',W)
