@@ -1,0 +1,7 @@
+argparse
+requests
+numpy
+metapredict
+matplotlib
+scikit-bio
+git+https://git@github.com/idptools/sparrow.git
