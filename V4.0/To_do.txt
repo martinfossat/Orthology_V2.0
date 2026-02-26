@@ -1,0 +1,14 @@
+## Make an annotation database
+#### Should be region specific and
+#### That is :
+#### A number of gene associated annotations
+######## Can be localization, tissue type, ect...
+#### A number of protein sequence annotations, can be folded, IDR, SLIM,
+####
+
+
+## Remake the homology plotting, so that there is a way to only specify a subset of genes to be plotted
+##
+## Make a reuse option for database, which will check if it exists, and only do homology of unexisting entries
+
+

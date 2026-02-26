@@ -790,3 +790,25 @@ def get_orga_dic_gProfiler():
     "Leishmania major": "lmajor",
     "Pythium irregulare": "pirregulare",
     "Phytophthora lateralis": "plateralis"}
+
+def get_orga_dic_ensembl():
+    import requests
+    server="https://rest.ensembl.org"
+    ext="/info/species?"
+    r=requests.get(server+ext,headers={"Content-Type":"application/json"})
+
+    species_list=[s['name'] for s in r.json()['species']]
+    name_list=[n['display_name'] for n in r.json()['species']]
+
+    dic_out={}
+    for i,j in zip(species_list,name_list):
+        dic_out[j]=i
+    return dic_out
+
+
+
+def get_gene_annotation_label_dic():
+    return {'Protein class':"PC",'Biological process':"BP",'Molecular function':"MF","Subcellular main location":"SML","Subcellular additional location":"SAL"}
+
+def gene_protein_class_list():
+    ["Enzymes","Metabolic proteins","CD markers","Blood group antigen proteins","Transporters","Ribosomal proteins","G-protein coupled receptors","Voltage-gated ion channels","Predicted membrane proteins","Predicted secreted proteins","Predicted intracellular proteins","Plasma proteins","Transcription factors","RNA polymerase related proteins","RAS pathway related proteins","Citric acid cycle related proteins","Essential proteins","Immunoglobulin genes","T-cell receptor genes","Cancer-related genes","Candidate cardiovascular disease genes","Disease related genes","FDA approved drug targets","Potential drug targets","Human disease related genes","Mapped to UniProt SWISS-PROT","Mapped to neXtProt","Protein evidence (Kim et al 2014)","Protein evidence (Ezkurdia et al 2014)"]
