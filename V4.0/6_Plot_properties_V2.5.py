@@ -130,9 +130,6 @@ if __name__=="__main__":
     f=open(properties_file)
     properties=json.load(f)
 
-
-
-
     region_types=seq_labels
     save_all_prop={}
 
@@ -208,7 +205,6 @@ if __name__=="__main__":
                 name=at+"_"+annotation[at][an]+'_NCPR'
                 OU.plot_bar_charts(masked_database,region_type,species,ensembles,name,label_dic_short)
 
-
                 ensembles=['q_at_pH_7.4']
                 name=at+"_"+annotation[at][an]+'_Charge_at_pH'
                 OU.plot_bar_charts(masked_database,region_type,species,ensembles,name,label_dic_short)
@@ -238,3 +234,4 @@ if __name__=="__main__":
         ensembles=['rg','re','n']
         name='Predicted_IDR_properties'
         OU.plot_bar_charts(save_all_prop[region_type],region_type,species,ensembles,name,label_dic_short)
+

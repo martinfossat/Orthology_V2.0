@@ -76,10 +76,9 @@ class Homology_Compare_Manager():
         return compare,compare_top,compare_norm
     def get_all(self):
         return self.save_all_compare,self.save_all_ids_top,self.save_all_ids_norm,self.save_all_ids_ref,self.save_all_compare_top,self.save_all_compare_norm,self.save_all_len_ratio
-
-
     def get_compare(self):
         return self.save_all_compare,self.save_all_compare_top,self.save_all_compare_norm
+
 def find_matching_folded_domains(bounds,bounds_ref,seq_oth,seq_ref,length_max_ratio=0.8,homology_min=0.4):
     bound_match=[]
     match_score=[]

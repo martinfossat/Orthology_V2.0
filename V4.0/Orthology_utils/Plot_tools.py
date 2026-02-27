@@ -77,7 +77,6 @@ def plot_hist(save_all_prop,region_type,species,label_dic,bin_properties):
             #Need to remove and do explicitly, this nis not necessary
             for i in range(2):
                 if bin_properties[prop][i] is None :
-
                     if i==0:
                         modulo=np.amin(save_all_prop[prop][orga])%bin_properties[prop][2]
                         temp_tuple+=(np.amin(save_all_prop[prop][orga])-modulo-bin_properties[prop][2],)
