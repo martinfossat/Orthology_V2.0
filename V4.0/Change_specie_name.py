@@ -3,7 +3,7 @@ import argparse
 import Orthology_utils as OU
 
 orga_dic={"hsapiens": "homo_sapiens",
-            "homo_sapiens":"homo_sapiens",
+        "homo_sapiens":"homo_sapiens",
           "drerio": "danio_rerio",
           "danio_rerio" : "danio_rerio",
           "mmusculus": "mus_musculus",
@@ -68,4 +68,4 @@ if __name__=="__main__":
                 Ortho_rec[n][orga_dic[orga1]]=ortho[n][orga1]
 
         with open('./Batches_new/Ortho/N_'+str(i)+'.json', 'w') as f:
-            json.dump(Ortho_rec, f)
+            json.dump(Ortho_rec,f)

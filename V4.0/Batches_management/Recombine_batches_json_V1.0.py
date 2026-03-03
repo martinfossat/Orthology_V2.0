@@ -1,5 +1,6 @@
 import json
 import argparse
+
 Homologies_rec={}
 Names_rec={}
 Seq_Prop_rec={}
@@ -11,7 +12,6 @@ orga_dic={"hsapiens": "homo_sapiens",
           "danio_rerio" : "danio_rerio",
           "mmusculus": "mus_musculus",
           "mus_musculus":"mus_musculus"}
-
 
 if __name__=="__main__":
     ################## Parser declaration ######################
@@ -59,6 +59,7 @@ if __name__=="__main__":
             continue
         for n in names:
             Names_rec[n]=names[n]
+
         # Sequence properties
         file_name='./Batches/Seq_prop/N_'+str(i)+'.json'
 
