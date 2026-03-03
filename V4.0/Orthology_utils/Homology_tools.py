@@ -177,7 +177,11 @@ def get_all_homologies(ref_orga,orth_ref,label,specie,save_homo,min_len_ratio,to
             id_tmp_2=''
             for prot_ref in save_homo[ref_orga][specie][orth_ref][orth]:
                 for prot in save_homo[ref_orga][specie][orth_ref][orth][prot_ref]:
+                    if not 'all' in save_homo[ref_orga][specie][orth_ref][orth][prot_ref][prot] :
+                        #This may happen if MLO was on during the comaprison step
+                        continue
                     for region in save_homo[ref_orga][specie][orth_ref][orth][prot_ref][prot]['all']:
+
                         reg1=np.array(region.split('_&_')[0].split('_'),dtype=int)
                         len1=reg1[1]-reg1[0]
                         reg2=np.array(region.split('_&_')[1].split('_'),dtype=int)
@@ -189,7 +193,6 @@ def get_all_homologies(ref_orga,orth_ref,label,specie,save_homo,min_len_ratio,to
                         if len2>max_len_tmp2:
                             max_len_tmp2=len2
                             id_tmp_2=prot
-
 
         for prot_ref in save_homo[ref_orga][specie][orth_ref][orth]:
             if MLO_only and prot_ref!=id_tmp_1 :

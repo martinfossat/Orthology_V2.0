@@ -146,8 +146,8 @@ def plot_bar_charts(save_all_prop,region_type,species,ensembles,name,label_dic_s
                 norm=100.
             else :
                 norm=1.
-            value=np.mean(np.array(save_all_prop[prop][orga])/norm)
-            val_std=np.std(np.array(save_all_prop[prop][orga])/norm)
+            value=np.nanmean(np.array(save_all_prop[prop][orga])/norm)
+            val_std=np.nanstd(np.array(save_all_prop[prop][orga])/norm)
             plt.bar(pos,value,color=colors[j],width=1/(len(species)+N_offset),label=pre+orga,yerr=val_std,capsize=3)
             j+=1
         i+=1
