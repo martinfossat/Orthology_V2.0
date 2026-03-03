@@ -1,5 +1,6 @@
 import numpy as np
 import requests
+from requests.exceptions import (ConnectionError,Timeout,HTTPError,RequestException)
 import json
 import argparse
 import Orthology_utils as OU
@@ -76,11 +77,12 @@ if __name__=="__main__":
     last_line_change=0
     save_prev_name=''
     save_prev_id=''
-
-    Names_all={}
+    #
+    # Names_all={}
     Orthology_all={}
     Homologies_all={}
     Sequences_all={}
+    bad_requests={}
 
     headers={"Content-Type":"application/json"}
     server="https://rest.ensembl.org/"
@@ -88,23 +90,32 @@ if __name__=="__main__":
     for t in range(1,len(organisms_all)):
         for name_org in data:
             ext="/homology/symbol/"+original_organism+"/"+name_org+"?"+"target_species="+organisms_all[t]+";type=orthologues"
-            r=requests.get(server+ext,headers=headers)
-
-            if not r.ok:
+            r1=requests.get(server+ext,headers=headers)
+            if not r1.ok:
                 continue
 
-            decoded=r.json()
+            decoded=r1.json()
             id_org=decoded["data"][0]['id']
             for num in range(len(decoded["data"][0]['homologies'])):
                 pct_id=decoded["data"][0]['homologies'][num]['target']['perc_id']
                 prot_id_org=decoded["data"][0]['homologies'][num]['source']['protein_id']
                 id_new=decoded["data"][0]['homologies'][num]['target']['id']
                 prot_id_new=decoded["data"][0]['homologies'][num]['target']['protein_id']
-                # Looking up names of orthologs
-                ext="lookup/id/"+id_new+"?expand=1"
-                r=requests.get(server+ext,headers=headers)
-                name_new=r.json()['display_name']
-
+                # # Looking up names of orthologs
+                # ext="lookup/id/"+id_new+"?expand=1"
+                # r2=requests.get(server+ext,headers=headers)
+                #
+                # try :
+                #     r2.raise_for_status()
+                #     name_new=r2.json()['display_name']
+                # except ConnectionError:
+                #     name_new='N/A_(CE)'
+                # except Timeout :
+                #     name_new='N/A_(TO)'
+                # except HTTPError :
+                #     name_new='N/A_('+str(HTTPError.r2.status_code)+')'
+                # except RequestException:
+                #     name_new='N/A_('+str(RequestException)+')'
                 # # Getting sequences
                 # ext='sequence/id/'+'?multiple_sequences=1;type=protein'
                 # headers={"Content-Type":"application/json","Accept":"application/json"}
@@ -124,19 +135,20 @@ if __name__=="__main__":
                     Orthology_all[name_org]={}
                     Orthology_all[name_org][original_organism]={}
                     Orthology_all[name_org][original_organism][id_org]=[]
-                    Names_all[id_org]=name_org
+                    # Names_all[id_org]=name_org
+
 
                 # If that organism in that gene does not exist yet
                 if organisms_all[t] not in Orthology_all[name_org] :
                     Orthology_all[name_org][organisms_all[t]]={}
                 Orthology_all[name_org][organisms_all[t]][id_new]=[]
-                Names_all[id_new]=name_new
+                # Names_all[id_new]=name_new
 
-                print(original_organism,organisms_all[t])
-                print(name_org,name_new)
-                print(id_org,id_new)
-                print(prot_id_org,prot_id_new)
-                print(pct_id)
+                # print(original_organism,organisms_all[t])
+                # print(name_org,name_new)
+                # print(id_org,id_new)
+                # print(prot_id_org,prot_id_new)
+                # print(pct_id)
 
     # Ok now we have all the orthologs, and we can check the sequences
     # For that we first get all gene ids, and we then ask the server, then we assign the protein in the json
@@ -188,8 +200,8 @@ if __name__=="__main__":
     with open(orthology_file,'w') as f:
         json.dump(Orthology_all,f)
         
-    with open(name_file,'w') as f:
-        json.dump(Names_all,f)
+    # with open(name_file,'w') as f:
+    #     json.dump(Names_all,f)
 
     with open(sequences_file,'w') as f:
         json.dump(Sequences_all,f)

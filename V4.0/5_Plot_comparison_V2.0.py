@@ -280,36 +280,59 @@ if __name__=="__main__":
         f=open(name_file)
         save_names=json.load(f)
         # ok this is a problemn
-        list_vals=[[] for i in range(len(plot_list_name))]
 
         save_all_compare,save_all_ids_top,save_all_ids_norm,save_all_ids_ref,save_all_compare_top,save_all_compare_norm,save_all_len_ratio=AllSeqLab[label].get_all()
 
-        for i in range(len(save_all_ids_ref)):
-            if plot_list_org==specie_top:
-                split_tmp=save_all_ids_top[i].split('__')
-                gene_id=split_tmp[0]
+        W_miss=''
 
-            elif plot_list_org==specie_norm:
-                split_tmp=save_all_ids_norm[i].split('__')
-                gene_id=split_tmp[0]
+        if len(plot_list_name)!=0:
 
-            elif plot_list_org==ref_orga:
-                gene_id=save_all_ids_ref[i]
-            else :
-                print("Pb ")
-                quit()
+            list_vals=[[] for i in range(len(plot_list_name))]
+            for i in range(len(save_all_ids_ref)):
+                if plot_list_org==specie_top:
+                    split_tmp=save_all_ids_top[i].split('__')
+                    gene_id=split_tmp[0]
+
+                elif plot_list_org==specie_norm:
+                    split_tmp=save_all_ids_norm[i].split('__')
+                    gene_id=split_tmp[0]
+
+                elif plot_list_org==ref_orga:
+                    gene_id=save_all_ids_ref[i]
+
+                if not gene_id in save_names :
+                    W_miss+=gene_id+'\n'
+                    continue
+                for n in range(len(plot_list)):
+                    if save_names[gene_id] in plot_list[n]:
+                        list_vals[n]+=[save_all_compare[i]]
+            colors=[plt.cm.nipy_spectral(i/(len(plot_list_name))) for i in range(len(plot_list_name)+1)]
+            plt.close()
+
+            means=[]
+            MAX=0
             for n in range(len(plot_list)):
-                if save_names[gene_id] in plot_list[n]:
-                    list_vals[n]+=save_all_compare
+                bins=np.arange(0, np.amax(list_vals[n])+binwidth, binwidth)
+                bins=plt.hist(list_vals[n],histtype='step',label=plot_list_name[n].replace('_',' '),color=colors[n],bins=bins,density=True)
 
-        colors=[plt.cm.nipy_spectral(i/(len(plot_list_name))) for i in range(len(plot_list_name))]
-        plt.close()
-        for n in range(len(plot_list)):
-            bins=plt.hist(list_vals[n],histtype='step',label=plot_list_name[n],color=colors[n])
-            plt.vlines(np.mean(list_vals[n]),0,np.amax(bins[0]))
-        plt.legend()
+                MAX=max(MAX,np.amax(bins[0]))
+                means+=[np.mean(list_vals[n])]
+            # Adding the whole distribution for comparison
+            bins=np.arange(0, np.amax(list_vals[n])+binwidth, binwidth)
+            bins=plt.hist(save_all_compare, histtype='step', label='Everything', color=colors[n+1],bins=bins,density=False)
+            MAX=max(MAX, np.amax(bins[0]))
+            means+=[np.mean(save_all_compare)]
 
-        plt.savefig('Gene_categories.pdf')
+            for n in range(len(means)):
+                plt.vlines(means[n],0,MAX,color=colors[n],linestyle='--')
+
+
+            plt.xlim(0,2)
+            plt.legend()
+            print("Missing IDs\n"+W_miss)
+            plt.ylabel('Number of occurences')
+            plt.xlabel('Ratio of Homology to '+ref_orga+' ('+specie_top+'/'+specie_norm+')')
+            plt.savefig('Gene_categories.pdf')
 
         # Writing the sorted homology comparison
         W_tmp_ref=ref_orga+'_id\t'+ref_orga+'_name'
@@ -319,21 +342,40 @@ if __name__=="__main__":
 
         # There is one line per reference gene, implying the reference gene is the same for each other organism, but
         # However, the reference isoform used may not be the same in the two organism, so we put it twice
-
+        W_missing=''
 
         for i in range(len(save_all_ids_ref)):
-            W_tmp_ref=str(save_all_ids_ref[i])+'\t'+str(save_names[save_all_ids_ref[i]])
+            try :
+                name=save_names[save_all_ids_ref[i]]
+            except :
+                W_missing+=save_all_ids_ref[i]+'\n'
+                name='N/A'
+
+            W_tmp_ref=str(save_all_ids_ref[i])+'\t'+name
 
             split_tmp=save_all_ids_top[i].split('__')
             gene_id=split_tmp[0]
-            W_tmp_top=str(gene_id)+'\t'+str(save_names[gene_id])+'\t'+split_tmp[1]+'\t'+str(save_all_compare_top[i])
 
+            try :
+                name=save_names[gene_id]
+            except :
+                W_missing+=gene_id+'\n'
+                name='N/A'
+
+            W_tmp_top=str(gene_id)+'\t'+name+'\t'+split_tmp[1]+'\t'+str(save_all_compare_top[i])
 
             split_tmp=save_all_ids_norm[i].split('__')
             gene_id=split_tmp[0]
-            W_tmp_norm=str(gene_id)+'\t'+str(save_names[gene_id])+'\t'+split_tmp[1]+'\t'+str(save_all_compare_norm[i])
+
+            try :
+                name=save_names[gene_id]
+            except :
+                W_missing+=gene_id+'\n'
+                name='N/A'
+
+            W_tmp_norm=str(gene_id)+'\t'+name+'\t'+split_tmp[1]+'\t'+str(save_all_compare_norm[i])
 
             W+=W_tmp_ref+'\t'+W_tmp_top+'\t'+W_tmp_norm+'\t'+str(save_all_compare[i])+'\n'
 
-
+        OU.write_file('Missing_names.txt',W_missing)
         OU.write_file('Sorted_ids_'+label+'.txt',W)
