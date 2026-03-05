@@ -793,6 +793,11 @@ def get_orga_dic_gProfiler():
 
 def get_orga_dic_ensembl():
     import json
+    from pathlib import Path
+
+    # Get the directory where THIS script is located
+    module_dir=Path(__file__).parent
+
     # import requests
     # server="https://rest.ensembl.org"
     # ext="/info/species?"
@@ -804,24 +809,25 @@ def get_orga_dic_ensembl():
     # dic_out={}
     # for i,j in zip(species_list,name_list):
     #     dic_out[j]=i
-    f=open('Species_Ensembl.json')
+    f=open(str(module_dir)+'/Species_Ensembl.json')
+
     dic_out=json.load(f)
 
     return dic_out
 
-def get_orga_dic_ensembl():
-    import requests
-    server="https://rest.ensembl.org"
-    ext="/info/species?"
-    r=requests.get(server+ext,headers={"Content-Type":"application/json"})
-
-    species_list=[s['name'] for s in r.json()['species']]
-    name_list=[n['display_name'] for n in r.json()['species']]
-
-    dic_out={}
-    for i,j in zip(species_list,name_list):
-        dic_out[j]=i
-    return dic_out
+# def get_orga_dic_ensembl():
+#     import requests
+#     server="https://rest.ensembl.org"
+#     ext="/info/species?"
+#     r=requests.get(server+ext,headers={"Content-Type":"application/json"})
+#
+#     species_list=[s['name'] for s in r.json()['species']]
+#     name_list=[n['display_name'] for n in r.json()['species']]
+#
+#     dic_out={}
+#     for i,j in zip(species_list,name_list):
+#         dic_out[j]=i
+#     return dic_out
 
 
 
