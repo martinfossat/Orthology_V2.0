@@ -39,7 +39,6 @@ if __name__=="__main__":
     # Implement comparison based on species gene list
     # Transfer name of species from gProfiler to Ensembl id
 
-
     if args.iso_compare :
         if args.iso_compare=='MLO':
             use_MLF=False
@@ -226,7 +225,9 @@ if __name__=="__main__":
 
                         seq_ref_raw=Sequences_all[ref_id]
                         seq_raw=Sequences_all[seq_id]
-
+                        if clean_sequence:
+                            seq_raw=OU.clean_seq(seq_raw)
+                            seq_ref_raw=OU.clean_seq(seq_ref_raw)
                         if "all" in seq_labels :
                             if not ref_id in Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id]:
                                 Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id]={}

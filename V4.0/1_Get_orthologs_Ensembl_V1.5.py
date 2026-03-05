@@ -4,6 +4,8 @@ from requests.exceptions import (ConnectionError,Timeout,HTTPError,RequestExcept
 import json
 import argparse
 import Orthology_utils as OU
+import os
+import time
 
 if __name__=="__main__":
     ################## Parser declaration ######################
@@ -15,6 +17,7 @@ if __name__=="__main__":
     parser.add_argument("--orthology_file","-of",help='Name of the orthology database json output file. Default is Orthology.json')
     parser.add_argument("--sequences_file","-sf",help='Name of the sequences database json output file. Default is Sequences.json')
     parser.add_argument("--names_file","-nf",help='Name of the names database json output file. Default is Names.json')
+
     args = parser.parse_args()
 
     if args.gene_file :
@@ -77,30 +80,81 @@ if __name__=="__main__":
     last_line_change=0
     save_prev_name=''
     save_prev_id=''
+    write_partial=True
+    W_does_not_exit=''
+    # if os.path.exists(orthology_file):
+    #     # I should load the existing file in case one wants to do a difference comparison
+    #     f=open(orthology_file)
+    #     Orthology_all=json.load(f)
+    # else :
+    #     Orthology_all={}
     #
-    # Names_all={}
-    Orthology_all={}
-    Homologies_all={}
+    try :
+        f=open(orthology_file)
+        Orthology_all=json.load(f)
+    except :
+        Orthology_all={}
+
+    # try :
+    #     f=open(sequences_file)
+    #     Sequences_all=json.load(f)
+    # except :
     Sequences_all={}
-    bad_requests={}
 
     headers={"Content-Type":"application/json"}
     server="https://rest.ensembl.org/"
     print('Getting ortholog names')
     for t in range(1,len(organisms_all)):
         for name_org in data:
+            if name_org not in Orthology_all:
+                Orthology_all[name_org]={}
+                Orthology_all[name_org][original_organism]={}
+
+            if organisms_all[t] not in Orthology_all[name_org] :
+                Orthology_all[name_org][organisms_all[t]]={}
+
+            # If not means we have already done that
+            if len(Orthology_all[name_org][organisms_all[t]])!=0:
+                print("Already have")
+                print(name_org)
+                # This is if there is already an entry : that means we have done this gene succesfully
+                continue
             ext="/homology/symbol/"+original_organism+"/"+name_org+"?"+"target_species="+organisms_all[t]+";type=orthologues"
             r1=requests.get(server+ext,headers=headers)
+            N_wait=2
+            while r1.status_code==429:
+                sleep_time=float(r1.headers.get("Retry-After", 1))
+                time.sleep(sleep_time+N_wait)
+                r1=requests.get(server+ext, headers=headers)  # Retry once
+                print("Max connection wait (Orthologs)")
+                N_wait+=1
             if not r1.ok:
+                if r1.status_code==400 :
+                    W_does_not_exit+=name_org+'\n'
+                else :
+                    print(r1.status_code)
                 continue
 
             decoded=r1.json()
+
+            if len(decoded["data"])==0:
+                continue
+            # Here we are assuming the first gene is the best gene.
+            # This may not be the case for a very small subset of proteins
             id_org=decoded["data"][0]['id']
+            Orthology_all[name_org][original_organism][id_org]=[]
             for num in range(len(decoded["data"][0]['homologies'])):
                 pct_id=decoded["data"][0]['homologies'][num]['target']['perc_id']
                 prot_id_org=decoded["data"][0]['homologies'][num]['source']['protein_id']
                 id_new=decoded["data"][0]['homologies'][num]['target']['id']
                 prot_id_new=decoded["data"][0]['homologies'][num]['target']['protein_id']
+
+                Orthology_all[name_org][organisms_all[t]][id_new]=[]
+
+            if write_partial:
+                with open(orthology_file, 'w') as f:
+                    json.dump(Orthology_all, f)
+
                 # # Looking up names of orthologs
                 # ext="lookup/id/"+id_new+"?expand=1"
                 # r2=requests.get(server+ext,headers=headers)
@@ -131,17 +185,6 @@ if __name__=="__main__":
                 # And get the name for the other specie's gene                                          O
                 # Then using a homology test in the homology file to not do those that already exist.
                 # If that gene does not exist yet
-                if name_org not in Orthology_all :
-                    Orthology_all[name_org]={}
-                    Orthology_all[name_org][original_organism]={}
-                    Orthology_all[name_org][original_organism][id_org]=[]
-                    # Names_all[id_org]=name_org
-
-
-                # If that organism in that gene does not exist yet
-                if organisms_all[t] not in Orthology_all[name_org] :
-                    Orthology_all[name_org][organisms_all[t]]={}
-                Orthology_all[name_org][organisms_all[t]][id_new]=[]
                 # Names_all[id_new]=name_new
 
                 # print(original_organism,organisms_all[t])
@@ -167,7 +210,15 @@ if __name__=="__main__":
         ext='sequence/id/'+'?multiple_sequences=1;type=protein'
         headers={"Content-Type":"application/json","Accept":"application/json"}
         r=requests.post(server+ext,headers=headers,data='{ "ids" : '+str(all_ids[N*LEN_MAX:(N+1)*LEN_MAX]).replace("'",'"')+' }')
+        N_wait=2
+        while r.status_code==429:
+            sleep_time=float(r.headers.get("Retry-After", 1))
+            time.sleep(sleep_time+N_wait)
+            r=requests.get(server+ext, headers=headers)  # Retry once
+            print("Max connection wait (Sequences)")
+            N_wait+=1
         seqs_ref=r.json()
+
         N+=1
         # This is to avoid the no results coming back from the query (is a dict instead of a list)
         if type(seqs_ref)!=type([]):
@@ -195,15 +246,11 @@ if __name__=="__main__":
                     for vers in inds :
                         seq_id=queries_seq_id_list[vers]
                         Sequences_all[seq_id]=queries_seq_list[vers]
-                        Orthology_all[orths][orga][gene_id]+=[seq_id]
+                        if not seq_id in Orthology_all[orths][orga][gene_id]:
+                            Orthology_all[orths][orga][gene_id]+=[seq_id]
 
     with open(orthology_file,'w') as f:
         json.dump(Orthology_all,f)
-        
-    # with open(name_file,'w') as f:
-    #     json.dump(Names_all,f)
 
     with open(sequences_file,'w') as f:
         json.dump(Sequences_all,f)
-
-
