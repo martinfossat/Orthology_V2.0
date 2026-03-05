@@ -286,7 +286,6 @@ if __name__=="__main__":
         W_miss=''
 
         if len(plot_list_name)!=0:
-
             list_vals=[[] for i in range(len(plot_list_name))]
             for i in range(len(save_all_ids_ref)):
                 if plot_list_org==specie_top:
@@ -312,6 +311,8 @@ if __name__=="__main__":
             means=[]
             MAX=0
             for n in range(len(plot_list)):
+                print(n)
+                print(list_vals[n])
                 bins=np.arange(0, np.amax(list_vals[n])+binwidth, binwidth)
                 bins=plt.hist(list_vals[n],histtype='step',label=plot_list_name[n].replace('_',' '),color=colors[n],bins=bins,density=True)
 
@@ -319,7 +320,7 @@ if __name__=="__main__":
                 means+=[np.mean(list_vals[n])]
             # Adding the whole distribution for comparison
             bins=np.arange(0, np.amax(list_vals[n])+binwidth, binwidth)
-            bins=plt.hist(save_all_compare, histtype='step', label='Everything', color=colors[n+1],bins=bins,density=False)
+            bins=plt.hist(save_all_compare, histtype='step', label='Everything', color=colors[n+1],bins=bins,density=True)
             MAX=max(MAX, np.amax(bins[0]))
             means+=[np.mean(save_all_compare)]
 
