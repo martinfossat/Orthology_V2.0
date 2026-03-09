@@ -215,6 +215,7 @@ if __name__=="__main__":
     #Now that the clas is created, I need to create a object for each specific class, that is, the combination of seq_labels, gene label type and gene label names
     AllSeqLab={}
     save_means={}
+
     do_all=True
     # okay big change in V2.0, the gene annotation changes everything
     for label in seq_labels:
@@ -226,13 +227,11 @@ if __name__=="__main__":
         for orth_ref in save_homo[ref_orga][specie_top]:
             if not orth_ref in save_homo[ref_orga][specie_norm].keys():
                 # Skip if an ortholog exist in only one of the species that we are comparing
-                print("AAA")
                 continue
             # In this we will get the average over all regions and all isoforms
             save_temp_top,temp_len_ratio_top,save_temp_ids_top=OU.get_all_homologies(ref_orga,orth_ref,label,specie_top,save_homo,min_len_ratio,top_iso_fraction,factor_length_ratio=factor_len_ratio,MLO_only=not use_MLF)
             save_temp_norm,temp_len_ratio_norm,save_temp_ids_norm=OU.get_all_homologies(ref_orga,orth_ref,label,specie_norm,save_homo,min_len_ratio,top_iso_fraction,factor_length_ratio=factor_len_ratio,MLO_only=not use_MLF)
-            # print(save_temp_ids_top,save_temp_ids_norm)
-            # input()
+
             if do_all :
                 for top in range(len(save_temp_ids_top)):
                     for norm in  range(len(save_temp_ids_norm)):

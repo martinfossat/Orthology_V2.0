@@ -116,7 +116,7 @@ if __name__=="__main__":
         other_organism=args.additional_species
     else :
 
-        print("You need at least two ogranism to compare")
+        print("You need at least two organism to compare")
         quit()
 
     if args.seq_labels :
@@ -138,9 +138,9 @@ if __name__=="__main__":
 
     print('Loading sequence properties file')
     SeqProp=OU.Seq_Prop_Manager(properties_file)
-    print(SeqProp)
-    print('Loading homology file')
+
     if os.path.exists(homologies_file):
+        print('Loading homology file')
         # I should load the existing file in case one wants to do a difference comparison
         f=open(homologies_file)
         Sequence_homology_all=json.load(f)
@@ -155,6 +155,7 @@ if __name__=="__main__":
     val_types_seq=['NCPR', 'FCR','f-','f+','Kappa']
 
     for orths in Orthology_all:
+        print(orths)
         # I should make an orthology score matrix here
         # I need a reference organism, which will carry the scores for the others
         # They will be in order
@@ -286,7 +287,7 @@ if __name__=="__main__":
 
                                 Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["NFDs"][bounds_label]={}
                                 Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["NFDs"][bounds_label]['Homology']=str(score)
-                                Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id][ "NFDs"][bounds_label]['Homology_ratio']=str(norm)
+                                Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["NFDs"][bounds_label]['Homology_ratio']=str(norm)
                                 if bounds_label.split('_&_')[0] in bounds_labels_dis_ref and bounds_label.split('_&_')[1] in bounds_labels_dis:
                                     Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["IDRs"][bounds_label]={}
                                     Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["IDRs"][bounds_label]['Homology']=str(score)
