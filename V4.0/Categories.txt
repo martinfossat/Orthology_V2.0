@@ -1,4 +1,4 @@
-Positive Melanoma Markers	Positive Brain melanoma Markers	All Distinguishing Markers
+Positive_Melanoma_Markers	Positive_Brain_melanoma_Markers	All_Distinguishing_Markers
 fabp3	eno1a	icn
 icn	calm1b	fabp3
 rab2a	hbae5	npm1a

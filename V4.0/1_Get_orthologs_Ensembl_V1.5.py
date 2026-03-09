@@ -17,8 +17,13 @@ if __name__=="__main__":
     parser.add_argument("--orthology_file","-of",help='Name of the orthology database json output file. Default is Orthology.json')
     parser.add_argument("--sequences_file","-sf",help='Name of the sequences database json output file. Default is Sequences.json')
     parser.add_argument("--names_file","-nf",help='Name of the names database json output file. Default is Names.json')
-
+    parser.add_argument("--division","-d",help='Division. Default is Vertebrates. Can be Fungi, Plants, Protists, Metazoa, Bacteria or Vertebrates')
     args = parser.parse_args()
+
+    if args.division :
+        division=args.division
+    else :
+        division='Vertebrates'
 
     if args.gene_file :
         filename=args.gene_file
@@ -55,15 +60,17 @@ if __name__=="__main__":
     else :
         other_organism=[]
 
-    dictionary_organisms=OU.get_orga_dic_ensembl()
+    dictionary_organisms=OU.get_orga_dic_ensembl(division)
     dictionary_organisms_inv=dict(zip(dictionary_organisms.values(),dictionary_organisms.keys()))
+
     organisms_types=[]
     organisms_all=[original_organism]+other_organism
 
     for i in range(len(organisms_all)):
         if not organisms_all[i] in dictionary_organisms_inv :
-            print('One of the organisms does not match the name used in Ensembl, please only use Ensembl ID names.')
+            print('One of the organisms ('+organisms_all[i]+') does not match the name used in Ensembl, please only use Ensembl ID names, or specify a division (-d option).')
             quit(1)
+
     # Standard headers for Ensembl
     headers={"Content-Type":"application/json"}
 

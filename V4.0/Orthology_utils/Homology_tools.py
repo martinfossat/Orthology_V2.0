@@ -169,7 +169,7 @@ def get_all_homologies(ref_orga,orth_ref,label,specie,save_homo,min_len_ratio,to
         temp_iso_id_pair=[]
         # For thr MLO : we are going to have to loop over all of the combinations, then find the longest to longest for
         # the all label, then save the id and skip until id is reached
-        # This measn that the
+        # This means that the
         if MLO_only:
             max_len_tmp1=0
             id_tmp_1=''
