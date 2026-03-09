@@ -60,7 +60,6 @@ if __name__=="__main__":
         except :
             print('Could not open '+file_name)
 
-
         # Sequence properties
         file_name='./Batches/Seq_prop/N_'+str(i)+'.json'
 
@@ -71,9 +70,6 @@ if __name__=="__main__":
                 Seq_Prop_rec[n]=seq_prop[n]
         except :
             print('Could not open '+file_name)
-
-
-
         # Orthology
         file_name='./Batches/Ortho/N_'+str(i)+'.json'
 
@@ -81,14 +77,10 @@ if __name__=="__main__":
             f=open(file_name)
             ortho=json.load(f)
             for n in ortho:
-
                 Ortho_rec[n]=ortho[n]
         except :
             print('Could not open '+file_name)
             continue
-
-
-
 
     with open('Homology.json','w') as f:
         json.dump(Homologies_rec,f)
