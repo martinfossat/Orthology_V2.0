@@ -791,29 +791,52 @@ def get_orga_dic_gProfiler():
     "Pythium irregulare": "pirregulare",
     "Phytophthora lateralis": "plateralis"}
 
-def get_orga_dic_ensembl():
-    import json
-    from pathlib import Path
+# def get_orga_dic_ensembl():
+#     import json
+#     from pathlib import Path
+#
+#     # Get the directory where THIS script is located
+#     module_dir=Path(__file__).parent
+#
+#     # import requests
+#     # server="https://rest.ensembl.org"
+#     # ext="/info/species?"
+#     # r=requests.get(server+ext,headers={"Content-Type":"application/json"})
+#     #
+#     # species_list=[s['name'] for s in r.json()['species']]
+#     # name_list=[n['display_name'] for n in r.json()['species']]
+#     #
+#     # dic_out={}
+#     # for i,j in zip(species_list,name_list):
+#     #     dic_out[j]=i
+#     f=open(str(module_dir)+'/Species_Ensembl.json')
+#
+#     dic_out=json.load(f)
+#
+#     return dic_out
 
-    # Get the directory where THIS script is located
-    module_dir=Path(__file__).parent
+def get_orga_dic_ensembl(division):
+    import requests
+    """
+    Retrieves species mapping for a specific Ensembl division.
+    Valid divisions: Fungi, Plants, Protists, Metazoa, Bacteria, Vertebrates.
+    """
+    server="https://rest.ensembl.org"
+    # We use the 'genomes/division' endpoint for non-vertebrate groups
+    # Note: Ensembl internally prefixes divisions with 'Ensembl' (e.g., EnsemblFungi)
+    ext=f"/info/genomes/division/Ensembl{division}?"
 
-    # import requests
-    # server="https://rest.ensembl.org"
-    # ext="/info/species?"
-    # r=requests.get(server+ext,headers={"Content-Type":"application/json"})
-    #
-    # species_list=[s['name'] for s in r.json()['species']]
-    # name_list=[n['display_name'] for n in r.json()['species']]
-    #
-    # dic_out={}
-    # for i,j in zip(species_list,name_list):
-    #     dic_out[j]=i
-    f=open(str(module_dir)+'/Species_Ensembl.json')
+    try:
+        r=requests.get(server+ext,headers={"Content-Type":"application/json"})
+        r.raise_for_status()
+        data=r.json()
+        dic={s['display_name']:s['name'] for s in data}
+        # In this endpoint, the data is a list of dictionaries directly
+        print(dic)
+        return dic
+    except requests.exceptions.HTTPError as err:
+        return f"Error: {err}"
 
-    dic_out=json.load(f)
-
-    return dic_out
 
 # def get_orga_dic_ensembl():
 #     import requests

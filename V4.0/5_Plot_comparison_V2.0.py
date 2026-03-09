@@ -31,6 +31,9 @@ if __name__=="__main__":
     parser.add_argument("--bin_width","-bw",help="Width of the bins for histograms. Default is 0.2")
     parser.add_argument("--factor_len_ratio","-flr",help="Whether to multiply the homology by the length ratio. Can be 1 (on) or 0 (off). Default is 0")
 
+    # Ok now I will need to make an option to specify
+
+
     ############### NEW
     parser.add_argument("--seq_labels","-sl",help="Labels for the sequence annotation. Must correspond to name given in other programs. Default is \"all\", which is the whole sequence. Can be multiple arguments.",default=[],nargs='+')
     parser.add_argument("--annotation_file","-af",help='Name of the gene annotation json file. Default is Gene_annotations.json')
@@ -212,6 +215,7 @@ if __name__=="__main__":
     #Now that the clas is created, I need to create a object for each specific class, that is, the combination of seq_labels, gene label type and gene label names
     AllSeqLab={}
     save_means={}
+    do_all=True
     # okay big change in V2.0, the gene annotation changes everything
     for label in seq_labels:
         OU.check_and_create_rep('Plots/'+label)
@@ -222,21 +226,35 @@ if __name__=="__main__":
         for orth_ref in save_homo[ref_orga][specie_top]:
             if not orth_ref in save_homo[ref_orga][specie_norm].keys():
                 # Skip if an ortholog exist in only one of the species that we are comparing
+                print("AAA")
                 continue
-
+            # In this we will get the average over all regions and all isoforms
             save_temp_top,temp_len_ratio_top,save_temp_ids_top=OU.get_all_homologies(ref_orga,orth_ref,label,specie_top,save_homo,min_len_ratio,top_iso_fraction,factor_length_ratio=factor_len_ratio,MLO_only=not use_MLF)
             save_temp_norm,temp_len_ratio_norm,save_temp_ids_norm=OU.get_all_homologies(ref_orga,orth_ref,label,specie_norm,save_homo,min_len_ratio,top_iso_fraction,factor_length_ratio=factor_len_ratio,MLO_only=not use_MLF)
+            # print(save_temp_ids_top,save_temp_ids_norm)
+            # input()
+            if do_all :
+                for top in range(len(save_temp_ids_top)):
+                    for norm in  range(len(save_temp_ids_norm)):
+                        top_id=save_temp_ids_top[top]
+                        norm_id=save_temp_ids_norm[norm]
+                        score_top=save_temp_top[top]
+                        score_norm=save_temp_norm[norm]
+                        len_ratio_top=temp_len_ratio_top[top]
+                        len_ratio_norm=temp_len_ratio_norm[norm]
+                        AllSeqLab[label].add_entry(top_id,norm_id,orth_ref,score_top,score_norm,len_ratio_top,len_ratio_norm)
 
-            save_temp_top,temp_len_ratio_top,best_top_id=OU.get_top_x_pct(save_temp_top,temp_len_ratio_top,top_ortholog_fraction,names=save_temp_ids_top)
-            save_temp_norm,temp_len_ratio_norm,best_norm_id=OU.get_top_x_pct(save_temp_norm,temp_len_ratio_norm,top_ortholog_fraction,names=save_temp_ids_norm)
+            else :
+                # This get the average over the top x_pct
+                save_temp_top,temp_len_ratio_top,best_top_id=OU.get_top_x_pct(save_temp_top,temp_len_ratio_top,top_ortholog_fraction,names=save_temp_ids_top)
+                save_temp_norm,temp_len_ratio_norm,best_norm_id=OU.get_top_x_pct(save_temp_norm,temp_len_ratio_norm,top_ortholog_fraction,names=save_temp_ids_norm)
 
-            if not ((best_top_id is None ) or (best_norm_id is None)):
-                # There are cases where the ortholog does not exist in one organism, so don't use
-                AllSeqLab[label].add_entry(best_top_id,best_norm_id,orth_ref,save_temp_top,save_temp_norm,temp_len_ratio_top,temp_len_ratio_norm)
+                if not ((best_top_id is None ) or (best_norm_id is None)):
+                    # There are cases where the ortholog does not exist in one organism, so don't use
+                    AllSeqLab[label].add_entry(best_top_id,best_norm_id,orth_ref,save_temp_top,save_temp_norm,temp_len_ratio_top,temp_len_ratio_norm)
 
         print("Plotting "+label)
         AllSeqLab[label].sort_all()
-
         save_means[label]={}
         for at in annotation:
             save_means[label][at]={}
@@ -249,6 +267,7 @@ if __name__=="__main__":
 
         compare,compare_top,compare_norm=AllSeqLab[label].get_compare()
         OU.plot_2D_hists_wrapper(compare,compare_top,compare_norm,specie_top,specie_norm,ref_orga,binwidth,label,"")
+
 
         i=0
         for at in annotation:
@@ -283,6 +302,7 @@ if __name__=="__main__":
 
         save_all_compare,save_all_ids_top,save_all_ids_norm,save_all_ids_ref,save_all_compare_top,save_all_compare_norm,save_all_len_ratio=AllSeqLab[label].get_all()
 
+
         W_miss=''
 
         if len(plot_list_name)!=0:
@@ -305,18 +325,20 @@ if __name__=="__main__":
                 for n in range(len(plot_list)):
                     if save_names[gene_id] in plot_list[n]:
                         list_vals[n]+=[save_all_compare[i]]
+
             colors=[plt.cm.nipy_spectral(i/(len(plot_list_name))) for i in range(len(plot_list_name)+1)]
             plt.close()
 
             means=[]
             MAX=0
+
             for n in range(len(plot_list)):
                 print(n)
                 print(list_vals[n])
                 bins=np.arange(0, np.amax(list_vals[n])+binwidth, binwidth)
                 bins=plt.hist(list_vals[n],histtype='step',label=plot_list_name[n].replace('_',' '),color=colors[n],bins=bins,density=True)
 
-                MAX=max(MAX,np.amax(bins[0]))
+                #MAX=max(MAX,np.amax(bins[0]))
                 means+=[np.mean(list_vals[n])]
             # Adding the whole distribution for comparison
             bins=np.arange(0, np.amax(list_vals[n])+binwidth, binwidth)
