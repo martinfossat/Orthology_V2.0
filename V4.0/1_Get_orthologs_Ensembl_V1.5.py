@@ -1,10 +1,8 @@
 import numpy as np
 import requests
-from requests.exceptions import (ConnectionError,Timeout,HTTPError,RequestException)
 import json
 import argparse
 import Orthology_utils as OU
-import os
 import time
 
 if __name__=="__main__":
@@ -97,15 +95,14 @@ if __name__=="__main__":
     #     Orthology_all={}
     #
     try :
-        f=open(orthology_file)
-        Orthology_all=json.load(f)
+        if not overwrite :
+            f=open(orthology_file)
+            Orthology_all=json.load(f)
+        else :
+            Orthology_all={}
     except :
         Orthology_all={}
 
-    # try :
-    #     f=open(sequences_file)
-    #     Sequences_all=json.load(f)
-    # except :
     Sequences_all={}
 
     headers={"Content-Type":"application/json"}
@@ -162,43 +159,6 @@ if __name__=="__main__":
                 with open(orthology_file, 'w') as f:
                     json.dump(Orthology_all, f)
 
-                # # Looking up names of orthologs
-                # ext="lookup/id/"+id_new+"?expand=1"
-                # r2=requests.get(server+ext,headers=headers)
-                #
-                # try :
-                #     r2.raise_for_status()
-                #     name_new=r2.json()['display_name']
-                # except ConnectionError:
-                #     name_new='N/A_(CE)'
-                # except Timeout :
-                #     name_new='N/A_(TO)'
-                # except HTTPError :
-                #     name_new='N/A_('+str(HTTPError.r2.status_code)+')'
-                # except RequestException:
-                #     name_new='N/A_('+str(RequestException)+')'
-                # # Getting sequences
-                # ext='sequence/id/'+'?multiple_sequences=1;type=protein'
-                # headers={"Content-Type":"application/json","Accept":"application/json"}
-                #
-                # r=requests.post(server+ext,headers=headers,data='{ "ids" : ["'+prot_id+'","'+prot_id_new+'"] }')
-                # out=r.json()
-                #
-                # Sequences_all[out[0]['query']]=out[0]['seq']
-                # Sequences_all[out[1]['query']]=out[1]['seq']
-
-                # Now I need to save all of this in the orthology and homology files.
-                # Also get the full list of the sequences and isoforms, for later potential use.        0
-                # And get the name for the other specie's gene                                          O
-                # Then using a homology test in the homology file to not do those that already exist.
-                # If that gene does not exist yet
-                # Names_all[id_new]=name_new
-
-                # print(original_organism,organisms_all[t])
-                # print(name_org,name_new)
-                # print(id_org,id_new)
-                # print(prot_id_org,prot_id_new)
-                # print(pct_id)
 
     # Ok now we have all the orthologs, and we can check the sequences
     # For that we first get all gene ids, and we then ask the server, then we assign the protein in the json

@@ -38,7 +38,7 @@ if __name__=="__main__":
             homologies=json.load(f)
         except :
             print('Could not open '+file_name)
-            continue
+            #continue
 
         for ref_orga in homologies:
             if not ref_orga in Homologies_rec.keys():
@@ -46,8 +46,34 @@ if __name__=="__main__":
             for orga in homologies[ref_orga]:
                 if not orga in Homologies_rec[ref_orga].keys():
                     Homologies_rec[ref_orga][orga]={}
-                for orth_homo_id in homologies[ref_orga][orga]:
-                    Homologies_rec[ref_orga][orga][orth_homo_id]=homologies[ref_orga][orga][orth_homo_id]
+                for orth_ref_homo_id in homologies[ref_orga][orga]:
+                    if not orth_ref_homo_id in Homologies_rec[ref_orga][orga]:
+                        Homologies_rec[ref_orga][orga][orth_ref_homo_id]={}
+                    for orth_homo_id in homologies[ref_orga][orga][orth_ref_homo_id]:
+                        if not orth_homo_id in Homologies_rec[ref_orga][orga][orth_ref_homo_id]:
+                            Homologies_rec[ref_orga][orga][orth_ref_homo_id][orth_homo_id]={}
+
+                        for prot_ref_id in homologies[ref_orga][orga][orth_ref_homo_id][orth_homo_id]:
+                            if not prot_ref_id in Homologies_rec[ref_orga][orga][orth_ref_homo_id][orth_homo_id]:
+                                Homologies_rec[ref_orga][orga][orth_ref_homo_id][orth_homo_id][prot_ref_id]={}
+
+                            for prot_id in homologies[ref_orga][orga][orth_ref_homo_id][orth_homo_id][prot_ref_id]:
+                                if not prot_id in Homologies_rec[ref_orga][orga][orth_ref_homo_id][orth_homo_id][prot_ref_id]:
+                                    Homologies_rec[ref_orga][orga][orth_ref_homo_id][orth_homo_id][prot_ref_id][prot_id]={}
+
+                                for region_type in homologies[ref_orga][orga][orth_ref_homo_id][orth_homo_id][prot_ref_id][prot_id]:
+                                    if region_type in Homologies_rec[ref_orga][orga][orth_ref_homo_id][orth_homo_id][prot_ref_id][prot_id]:
+                                        if not Homologies_rec[ref_orga][orga][orth_ref_homo_id][orth_homo_id][prot_ref_id][prot_id]==homologies[ref_orga][orga][orth_ref_homo_id][orth_homo_id][prot_ref_id][prot_id]:
+                                            print(region_type)
+                                            print(Homologies_rec[ref_orga][orga][orth_ref_homo_id][orth_homo_id][prot_ref_id][prot_id])
+                                            print(homologies[ref_orga][orga][orth_ref_homo_id][orth_homo_id][prot_ref_id][prot_id])
+                                            input("Now")
+                                    Homologies_rec[ref_orga][orga][orth_ref_homo_id][orth_homo_id][prot_ref_id]=homologies[ref_orga][orga][orth_ref_homo_id][orth_homo_id][prot_ref_id]
+
+
+
+
+
 
         # Gene names
         file_name='./Batches/Names/N_'+str(i)+'.json'
@@ -60,7 +86,6 @@ if __name__=="__main__":
         except :
             print('Could not open '+file_name)
 
-
         # Sequence properties
         file_name='./Batches/Seq_prop/N_'+str(i)+'.json'
 
@@ -71,9 +96,6 @@ if __name__=="__main__":
                 Seq_Prop_rec[n]=seq_prop[n]
         except :
             print('Could not open '+file_name)
-
-
-
         # Orthology
         file_name='./Batches/Ortho/N_'+str(i)+'.json'
 
@@ -81,14 +103,10 @@ if __name__=="__main__":
             f=open(file_name)
             ortho=json.load(f)
             for n in ortho:
-
                 Ortho_rec[n]=ortho[n]
         except :
             print('Could not open '+file_name)
-            continue
-
-
-
+            #continue
 
     with open('Homology.json','w') as f:
         json.dump(Homologies_rec,f)
