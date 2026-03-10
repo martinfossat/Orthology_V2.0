@@ -39,9 +39,9 @@ if __name__=="__main__":
     dictionary_organisms_inv=dict(zip(dictionary_organisms.values(),dictionary_organisms.keys()))
 
     if print_list :
-        print('List of psecies')
+        print('List of species')
         for sp in dictionary_organisms:
-            print(sp,dictionary_organisms[sp])
+            print(sp,'\t\t\t\t',dictionary_organisms[sp])
         quit()
 
     if args.gene_file :
