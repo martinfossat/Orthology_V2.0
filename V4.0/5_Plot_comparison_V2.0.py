@@ -233,9 +233,11 @@ if __name__=="__main__":
             save_temp_norm,temp_len_ratio_norm,save_temp_ids_norm=OU.get_all_homologies(ref_orga,orth_ref,label,specie_norm,save_homo,min_len_ratio,top_iso_fraction,factor_length_ratio=factor_len_ratio,MLO_only=not use_MLF)
             # print(save_temp_ids_top,save_temp_ids_norm)
             # input()
+
             if do_all :
                 for top in range(len(save_temp_ids_top)):
                     for norm in  range(len(save_temp_ids_norm)):
+
                         top_id=save_temp_ids_top[top]
                         norm_id=save_temp_ids_norm[norm]
                         score_top=save_temp_top[top]
