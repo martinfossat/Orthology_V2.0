@@ -1,6 +1,5 @@
 import json
 
-
 def get_orga_dic_ensembl():
     import requests
     server="https://rest.ensembl.org"

@@ -235,6 +235,7 @@ if __name__=="__main__":
             if do_all :
                 for top in range(len(save_temp_ids_top)):
                     for norm in  range(len(save_temp_ids_norm)):
+
                         top_id=save_temp_ids_top[top]
                         norm_id=save_temp_ids_norm[norm]
                         score_top=save_temp_top[top]
