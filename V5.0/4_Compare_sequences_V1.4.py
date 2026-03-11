@@ -17,6 +17,8 @@ import numpy as np
 import math
 
 if __name__=="__main__":
+    sub_mat_names=['NUC.4.4','PAM30','PAM70','PAM250','BLOSUM45','BLOSUM50','BLOSUM62','BLOSUM80','BLOSUM90']
+    W_tmp=str(sub_mat_names).replace('[','').replace(']','').replace("'",'')
     ################## Parser declaration ######################
     parser = argparse.ArgumentParser(description="""Compares sequences of orthologs between a reference species and a number of other species. 
     Comparisons includes comparing sequence features, sequence ensemble prediction and charge sequence features, as well as calcualting the homology between sequences.""")
@@ -33,11 +35,26 @@ if __name__=="__main__":
     ############### NEW
     parser.add_argument("--seq_labels","-sl",help="Labels for the sequence annotation. Must correspond to name given in other programs. Default is \"all\", which is the whole sequence. Can be multiple arguments.")
     parser.add_argument("--iso_compare","-ic",help="How to compare isoforms. Option are : MLF (Minimum Length Fraction) Compares all protein isoform that have a pair length ratio above the value specified; MLO (Maximum Length Only) : only compare the longest isoforms between the two species. This is what is done in Ensembl. Default is MLO.")
+    parser.add_argument("--sub_mat","-sm",help="Substitution matrice names. Default is BLOSUM50. Can be "+W_tmp)
+
     args=parser.parse_args()
     # Last thing to do :
     # Make sure that the choosing of longest isoform for both species is possible at the plotting point.
     # Implement comparison based on species gene list
     # Transfer name of species from gProfiler to Ensembl id
+
+    if args.sub_mat :
+        if args.sub_mat not in sub_mat_names:
+
+            print("Invalid name for the substitution matrice")
+            quit()
+        else :
+            sub_mat_name=args.sub_mat
+    else :
+        sub_mat_name='BLOSUM50'
+
+
+
 
     if args.iso_compare :
         if args.iso_compare=='MLO':
@@ -123,6 +140,10 @@ if __name__=="__main__":
         seq_labels=args.seq_labels
     else :
         seq_labels=["all"]
+
+    sub_mat=OU.get_sub_mat(sub_mat_name)
+
+
 
     clean_sequence=True
 
@@ -244,7 +265,7 @@ if __name__=="__main__":
 
                             if do_homo:
                                 if not 'Homology' in Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["all"][str(0)+'_'+str(len(seq_ref_raw))+'_&_'+str(0)+'_'+str(len(seq_raw))]:
-                                    score,norm=OU.get_homology_score(seq_raw,seq_ref_raw,local=local)
+                                    score,norm=OU.get_homology_score(seq_raw,seq_ref_raw,local,sub_mat)
                                     Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["all"][str(0)+'_'+str(len(seq_ref_raw))+'_&_'+str(0)+'_'+str(len(seq_raw))]['Homology']=str(score)
                                     Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["all"][str(0)+'_'+str(len(seq_ref_raw))+'_&_'+str(0)+'_'+str(len(seq_raw))]['Homology_ratio']=str(norm)
 
@@ -281,7 +302,7 @@ if __name__=="__main__":
                                 seq_ref=seq_ref_raw[bounds_not_folded_ref[m,0]:bounds_not_folded_ref[m,1]]
                                 seq_oth=seq_raw[bounds_not_folded[m,0]:bounds_not_folded[m,1]]
 
-                                score,norm=OU.get_homology_score(seq_ref,seq_oth,local)
+                                score,norm=OU.get_homology_score(seq_ref,seq_oth,local,sub_mat)
                                 bounds_label=str(bounds_not_folded_ref[m,0])+'_'+str(bounds_not_folded_ref[m,1])+'_&_'+str(bounds_not_folded[m,0])+'_'+str(bounds_not_folded[m,1])
 
                                 Sequence_homology_all[ref_org][orga][orth_ref_id][orth_id][ref_id][seq_id]["NFDs"][bounds_label]={}

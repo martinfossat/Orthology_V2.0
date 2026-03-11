@@ -115,23 +115,24 @@ def find_matching_folded_domains(bounds,bounds_ref,seq_oth,seq_ref,length_max_ra
     bounds_not_folded=np.array(temp)
     return bound_match,match_score,bounds_not_folded,bounds_not_folded_ref
 
-def get_homology_score(seq_ref,seq,local):
+def get_sub_mat(name):
+    from Bio.Align import substitution_matrices
+    return substitution_matrices.load(name)
+def get_homology_score(seq_ref,seq,local,sub_mat):
     seq_ref=skbio.sequence.Protein(seq_ref)
     seq=skbio.sequence.Protein(seq)
     if local:
-        d=skbio.alignment.local_pairwise_align_protein(seq,seq_ref)
+        d=skbio.alignment.local_pairwise_align_protein(seq,seq_ref,substitution_matrix=sub_mat)
     else:
-        d=skbio.alignment.global_pairwise_align_protein(seq,seq_ref)
+        d=skbio.alignment.global_pairwise_align_protein(seq,seq_ref,substitution_matrix=sub_mat)
 
-    norm=get_self_alignement(seq_ref)
+    norm=get_self_alignment(seq_ref,sub_mat)
+
     return d[1],d[1]/norm
 
-def get_self_alignement(seq_test) :
-    count=0
-    for aa in range(len(AAs)):
-        for s in range(len(seq_test)):
-            count+=(str(seq_test[s])==AAs[aa])*AA_scores[aa]
-    return count
+def get_self_alignment(sequence,sub_mat):
+    # Sum the score for each character paired with itself
+    return sum(sub_mat[(aa,aa)] for aa in str(sequence))
 
 def get_bounds_inverted(bounds,seq):
     if len(bounds)==0:

@@ -1,0 +1,2 @@
+-d Fungi -os saccharomyces_cerevisiae_gca_002804325 -as clavispora_lusitaniae_gca_001673695 pichia_kudriavzevii_gca_003054445 -f Yeast_genome_short.txt
+-os danio_rerio -as mus_musculus homo_sapiens
