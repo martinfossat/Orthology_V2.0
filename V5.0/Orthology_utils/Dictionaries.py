@@ -824,13 +824,15 @@ def get_orga_dic_ensembl(division):
     server="https://rest.ensembl.org"
     # We use the 'genomes/division' endpoint for non-vertebrate groups
     # Note: Ensembl internally prefixes divisions with 'Ensembl' (e.g., EnsemblFungi)
-    ext=f"/info/genomes/division/Ensembl{division}?"
-
+    #ext=f"/info/genomes/division/Ensembl{division}?"
+    ext="/info/species?division=Ensembl"+division
     try:
+
         r=requests.get(server+ext,headers={"Content-Type":"application/json"})
         r.raise_for_status()
         data=r.json()
-        dic={s['display_name']:s['name'] for s in data}
+
+        dic={s['display_name']:s['name'] for s in data['species']}
         # In this endpoint, the data is a list of dictionaries directly
         return dic
     except requests.exceptions.HTTPError as err:

@@ -1,10 +1,8 @@
 import numpy as np
 import requests
-from requests.exceptions import (ConnectionError,Timeout,HTTPError,RequestException)
 import json
 import argparse
 import Orthology_utils as OU
-import os
 import time
 
 if __name__=="__main__":
@@ -33,7 +31,6 @@ if __name__=="__main__":
         division=args.division
     else :
         division='Vertebrates'
-
 
     dictionary_organisms=OU.get_orga_dic_ensembl(division)
     dictionary_organisms_inv=dict(zip(dictionary_organisms.values(),dictionary_organisms.keys()))
@@ -79,8 +76,6 @@ if __name__=="__main__":
     else :
         other_organism=[]
 
-
-
     organisms_types=[]
     organisms_all=[original_organism]+other_organism
 
@@ -107,24 +102,15 @@ if __name__=="__main__":
     save_prev_id=''
     write_partial=True
     W_does_not_exit=''
-    # if os.path.exists(orthology_file):
-    #     # I should load the existing file in case one wants to do a difference comparison
-    #     f=open(orthology_file)
-    #     Orthology_all=json.load(f)
-    # else :
-    #     Orthology_all={}
-    #
+
     try :
         f=open(orthology_file)
         Orthology_all=json.load(f)
     except :
         Orthology_all={}
 
-    # try :
-    #     f=open(sequences_file)
-    #     Sequences_all=json.load(f)
-    # except :
     Sequences_all={}
+
 
     headers={"Content-Type":"application/json"}
     server="https://rest.ensembl.org/"
@@ -144,8 +130,11 @@ if __name__=="__main__":
                 print(name_org)
                 # This is if there is already an entry : that means we have done this gene succesfully
                 continue
-            ext="/homology/symbol/"+original_organism+"/"+name_org+"?"+"target_species="+organisms_all[t]+";type=orthologues"
+
+            ext="/homology/symbol/"+original_organism+"/"+name_org+"?"+"target_species="+organisms_all[t]+";type=orthologues"+";compara="+division
+
             r1=requests.get(server+ext,headers=headers)
+
             N_wait=2
             while r1.status_code==429:
                 sleep_time=float(r1.headers.get("Retry-After", 1))
@@ -161,9 +150,10 @@ if __name__=="__main__":
                 continue
 
             decoded=r1.json()
-
+            print(decoded)
             if len(decoded["data"])==0:
                 continue
+
             # Here we are assuming the first gene is the best gene.
             # This may not be the case for a very small subset of proteins
             id_org=decoded["data"][0]['id']
@@ -180,43 +170,7 @@ if __name__=="__main__":
                 with open(orthology_file, 'w') as f:
                     json.dump(Orthology_all, f)
 
-                # # Looking up names of orthologs
-                # ext="lookup/id/"+id_new+"?expand=1"
-                # r2=requests.get(server+ext,headers=headers)
-                #
-                # try :
-                #     r2.raise_for_status()
-                #     name_new=r2.json()['display_name']
-                # except ConnectionError:
-                #     name_new='N/A_(CE)'
-                # except Timeout :
-                #     name_new='N/A_(TO)'
-                # except HTTPError :
-                #     name_new='N/A_('+str(HTTPError.r2.status_code)+')'
-                # except RequestException:
-                #     name_new='N/A_('+str(RequestException)+')'
-                # # Getting sequences
-                # ext='sequence/id/'+'?multiple_sequences=1;type=protein'
-                # headers={"Content-Type":"application/json","Accept":"application/json"}
-                #
-                # r=requests.post(server+ext,headers=headers,data='{ "ids" : ["'+prot_id+'","'+prot_id_new+'"] }')
-                # out=r.json()
-                #
-                # Sequences_all[out[0]['query']]=out[0]['seq']
-                # Sequences_all[out[1]['query']]=out[1]['seq']
 
-                # Now I need to save all of this in the orthology and homology files.
-                # Also get the full list of the sequences and isoforms, for later potential use.        0
-                # And get the name for the other specie's gene                                          O
-                # Then using a homology test in the homology file to not do those that already exist.
-                # If that gene does not exist yet
-                # Names_all[id_new]=name_new
-
-                # print(original_organism,organisms_all[t])
-                # print(name_org,name_new)
-                # print(id_org,id_new)
-                # print(prot_id_org,prot_id_new)
-                # print(pct_id)
 
     # Ok now we have all the orthologs, and we can check the sequences
     # For that we first get all gene ids, and we then ask the server, then we assign the protein in the json
@@ -230,6 +184,7 @@ if __name__=="__main__":
     LEN_MAX=50 # This si the maxx rom the ensemble rest API
     N=0
     #Turns out, the server would rather have lots of connection than big requests....
+
     while N*LEN_MAX<len(all_ids):
         print("Requesting sequences "+str(N*100*LEN_MAX/len(all_ids)))
         ext='sequence/id/'+'?multiple_sequences=1;type=protein'
@@ -273,6 +228,9 @@ if __name__=="__main__":
                         Sequences_all[seq_id]=queries_seq_list[vers]
                         if not seq_id in Orthology_all[orths][orga][gene_id]:
                             Orthology_all[orths][orga][gene_id]+=[seq_id]
+
+
+
 
     with open(orthology_file,'w') as f:
         json.dump(Orthology_all,f)
