@@ -36,7 +36,7 @@ if __name__=="__main__":
     else :
         verbose=True
 
-    orga_ref="hsapiens"
+    orga_ref="homo_sapiens"
     Gene_annotation={}
     dict=OU.get_gene_annotation_label_dic()
     print('Loading file')
@@ -48,7 +48,6 @@ if __name__=="__main__":
     for name in orthology:
         print("{:.2f}".format(100*float(i)/Nkeys)+" % done")
         i+=1
-        orga_ref="hsapiens"
         if not orga_ref in orthology[name]:
             continue
 

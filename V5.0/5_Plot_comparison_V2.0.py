@@ -42,7 +42,7 @@ if __name__=="__main__":
     parser.add_argument("--iso_compare","-ic",help="How to compare isoforms. Option are : MLF (Minimum Length Fraction) Compares all protein isoform that have a pair length ratio above the value specified; MLO (Maximum Length Only) : only compare the longest isoforms between the two species. This is what is done in Ensembl. Default is MLO.")
     parser.add_argument("--plot_list", "-pl", help='List genes to be plotted separately. Genes must be in columns, each first element of the column being the label for the gene list.')
     parser.add_argument("--plot_list_org", "-plo", help='Name of the organism for which the gene list is given')
-
+    #parser.add_argument("--org_avg", "-oa", help='Organism to average results upon.')
     args = parser.parse_args()
 
     if args.plot_list :
@@ -216,28 +216,24 @@ if __name__=="__main__":
     AllSeqLab={}
     save_means={}
     do_all=True
-    # okay big change in V2.0, the gene annotation changes everything
+    # Okay big change in V2.0, the gene annotation changes everything
     for label in seq_labels:
         OU.check_and_create_rep('Plots/'+label)
         OU.check_and_create_rep('Plots/'+label+'/Homology/')
         AllSeqLab[label]=OU.Homology_Compare_Manager()
-
         print("Retrieving data "+label)
         for orth_ref in save_homo[ref_orga][specie_top]:
             if not orth_ref in save_homo[ref_orga][specie_norm].keys():
                 # Skip if an ortholog exist in only one of the species that we are comparing
-                print("AAA")
                 continue
+
             # In this we will get the average over all regions and all isoforms
             save_temp_top,temp_len_ratio_top,save_temp_ids_top=OU.get_all_homologies(ref_orga,orth_ref,label,specie_top,save_homo,min_len_ratio,top_iso_fraction,factor_length_ratio=factor_len_ratio,MLO_only=not use_MLF)
             save_temp_norm,temp_len_ratio_norm,save_temp_ids_norm=OU.get_all_homologies(ref_orga,orth_ref,label,specie_norm,save_homo,min_len_ratio,top_iso_fraction,factor_length_ratio=factor_len_ratio,MLO_only=not use_MLF)
-            # print(save_temp_ids_top,save_temp_ids_norm)
-            # input()
 
             if do_all :
                 for top in range(len(save_temp_ids_top)):
                     for norm in  range(len(save_temp_ids_norm)):
-
                         top_id=save_temp_ids_top[top]
                         norm_id=save_temp_ids_norm[norm]
                         score_top=save_temp_top[top]
@@ -245,7 +241,6 @@ if __name__=="__main__":
                         len_ratio_top=temp_len_ratio_top[top]
                         len_ratio_norm=temp_len_ratio_norm[norm]
                         AllSeqLab[label].add_entry(top_id,norm_id,orth_ref,score_top,score_norm,len_ratio_top,len_ratio_norm)
-
             else :
                 # This get the average over the top x_pct
                 save_temp_top,temp_len_ratio_top,best_top_id=OU.get_top_x_pct(save_temp_top,temp_len_ratio_top,top_ortholog_fraction,names=save_temp_ids_top)
@@ -254,6 +249,11 @@ if __name__=="__main__":
                 if not ((best_top_id is None ) or (best_norm_id is None)):
                     # There are cases where the ortholog does not exist in one organism, so don't use
                     AllSeqLab[label].add_entry(best_top_id,best_norm_id,orth_ref,save_temp_top,save_temp_norm,temp_len_ratio_top,temp_len_ratio_norm)
+
+        if do_all :
+            AllSeqLab[label].average_upon_orga("top",top_ortholog_fraction)
+
+
 
         print("Plotting "+label)
         AllSeqLab[label].sort_all()
@@ -269,7 +269,6 @@ if __name__=="__main__":
 
         compare,compare_top,compare_norm=AllSeqLab[label].get_compare()
         OU.plot_2D_hists_wrapper(compare,compare_top,compare_norm,specie_top,specie_norm,ref_orga,binwidth,label,"")
-
 
         i=0
         for at in annotation:
@@ -300,10 +299,9 @@ if __name__=="__main__":
         # Getting the names of the genes from the file
         f=open(name_file)
         save_names=json.load(f)
-        # ok this is a problemn
+        # ok this is a problem
 
         save_all_compare,save_all_ids_top,save_all_ids_norm,save_all_ids_ref,save_all_compare_top,save_all_compare_norm,save_all_len_ratio=AllSeqLab[label].get_all()
-
 
         W_miss=''
 
@@ -348,7 +346,6 @@ if __name__=="__main__":
 
             for n in range(len(means)):
                 plt.vlines(means[n],0,MAX,color=colors[n],linestyle='--')
-
 
             plt.xlim(0,2)
             plt.legend()

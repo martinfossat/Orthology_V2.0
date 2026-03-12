@@ -21,13 +21,15 @@ class Homology_Compare_Manager():
     # This class should have a sequence labels, and a gene label name and a gene labels type
     def __init__(self):
         global annotation
-        self.save_all_compare=np.array([])
-        self.save_all_ids_ref=np.array([])
-        self.save_all_ids_top=np.array([])
-        self.save_all_ids_norm=np.array([])
-        self.save_all_compare_norm=np.array([])
-        self.save_all_compare_top=np.array([])
-        self.save_all_len_ratio=np.array([])
+        # Compare it the top/norm ratio
+        # I should convert to list to be faster
+        self.save_all_compare=[]
+        self.save_all_ids_ref=[]
+        self.save_all_ids_top=[]
+        self.save_all_ids_norm=[]
+        self.save_all_compare_norm=[]
+        self.save_all_compare_top=[]
+        self.save_all_len_ratio=[]
         # I think the best is to make a mask of the different gene labels
         self.masks_all={}
         for at in annotation:
@@ -37,47 +39,126 @@ class Homology_Compare_Manager():
 
     def add_entry(self,best_top_id,best_norm_id,orth_ref,save_temp_top,save_temp_norm,temp_len_ratio_top,temp_len_ratio_norm):
         global Gene_annotation,annotation
-        self.save_all_ids_top=np.append(self.save_all_ids_top,[best_top_id])
-        self.save_all_ids_norm=np.append(self.save_all_ids_norm,[best_norm_id])
-        self.save_all_ids_ref=np.append(self.save_all_ids_ref,[orth_ref])
-        self.save_all_compare=np.append(self.save_all_compare,[np.mean(save_temp_top)/np.mean(save_temp_norm)])
-        self.save_all_compare_top=np.append(self.save_all_compare_top,[np.mean(save_temp_top)])
-        self.save_all_compare_norm=np.append(self.save_all_compare_norm,[np.mean(save_temp_norm)])
-        self.save_all_len_ratio=np.append(self.save_all_len_ratio,[np.mean(temp_len_ratio_top)/np.mean(temp_len_ratio_norm)])
+        self.save_all_ids_top+=[best_top_id]
+        self.save_all_ids_norm+=[best_norm_id]
+        self.save_all_ids_ref+=[orth_ref]
+        self.save_all_compare+=[np.mean(save_temp_top)/np.mean(save_temp_norm)]
+        self.save_all_compare_top+=[np.mean(save_temp_top)]
+        self.save_all_compare_norm+=[np.mean(save_temp_norm)]
+        self.save_all_len_ratio+=[np.mean(temp_len_ratio_top)/np.mean(temp_len_ratio_norm)]
         for at in annotation:
             for an in range(len(annotation[at])):
                 if orth_ref in Gene_annotation:
                     if Gene_annotation[orth_ref][at] is None:
-                        self.masks_all[at][annotation[at][an]]=np.append(self.masks_all[at][annotation[at][an]],[False])
+                        self.masks_all[at][annotation[at][an]]+=[False]
                         continue
                 else:
-                    self.masks_all[at][annotation[at][an]]=np.append(self.masks_all[at][annotation[at][an]],[False])
+                    self.masks_all[at][annotation[at][an]]+=[False]
                     continue
 
                 if annotation[at][an] in Gene_annotation[orth_ref][at]:
-                    self.masks_all[at][annotation[at][an]]=np.append(self.masks_all[at][annotation[at][an]],[True])
+                    self.masks_all[at][annotation[at][an]]+=[True]
                 else:
-                    self.masks_all[at][annotation[at][an]]=np.append(self.masks_all[at][annotation[at][an]],[False])
+                    self.masks_all[at][annotation[at][an]]+=[False]
 
     def sort_all(self):
-        indices=np.argsort(self.save_all_compare)[::-1]
-        self.save_all_compare=self.save_all_compare[indices]
-        self.save_all_ids_top=self.save_all_ids_top[indices]
-        self.save_all_ids_norm=self.save_all_ids_norm[indices]
-        self.save_all_ids_ref=self.save_all_ids_ref[indices]
-        self.save_all_compare_top=self.save_all_compare_top[indices]
-        self.save_all_compare_norm=self.save_all_compare_norm[indices]
-        self.save_all_len_ratio=self.save_all_len_ratio[indices]
+        global Gene_annotation, annotation
+        indices=np.argsort(np.array(self.save_all_compare))[::-1]
+        self.save_all_compare=np.array(self.save_all_compare)[indices]
+        self.save_all_ids_top=np.array(self.save_all_ids_top)[indices]
+        self.save_all_ids_norm=np.array(self.save_all_ids_norm)[indices]
+        self.save_all_ids_ref=np.array(self.save_all_ids_ref)[indices]
+        self.save_all_compare_top=np.array(self.save_all_compare_top)[indices]
+        self.save_all_compare_norm=np.array(self.save_all_compare_norm)[indices]
+        self.save_all_len_ratio=np.array(self.save_all_len_ratio)[indices]
+        for at in annotation:
+            for an in range(len(annotation[at])):
+                self.masks_all[at][annotation[at][an]]=np.array(self.masks_all[at][annotation[at][an]])[indices]
+
 
     def get_compare_masked(self,at_type,an_type):
         compare=self.save_all_compare[self.masks_all[at_type][an_type]]
         compare_top=self.save_all_compare_top[self.masks_all[at_type][an_type]]
         compare_norm=self.save_all_compare_norm[self.masks_all[at_type][an_type]]
         return compare,compare_top,compare_norm
+
     def get_all(self):
         return self.save_all_compare,self.save_all_ids_top,self.save_all_ids_norm,self.save_all_ids_ref,self.save_all_compare_top,self.save_all_compare_norm,self.save_all_len_ratio
     def get_compare(self):
         return self.save_all_compare,self.save_all_compare_top,self.save_all_compare_norm
+    def average_upon_orga(self,opt,top_fraction):
+        # So the thing is that
+        def get_average(main_id,main_score,other1_id,other1_score,other2_id,other2_score,top_fraction):
+            # In this routine, I average on the other dimensions, such that only one entry for each enseigna remains on the opt dimension
+            # Note that if the option top ortholog fraction is 0, then it is not an average, but the best score only that results
+
+            out_main_id=[]
+            out_main_score=[]
+            out_other1_id=[]
+            out_other1_score=[]
+            out_other2_id=[]
+            out_other2_score=[]
+            main_orth_id=np.array(get_orth_id(main_id))
+            other1_orth_id=get_orth_id(other1_id)
+            other2_orth_id=get_orth_id(other2_id)
+            # So the goal here is to find all location os
+            for id in main_orth_id:
+                if not id in out_main_id:
+                    indices=np.argwhere(id==np.array(main_orth_id))[0]
+                    # Now I got the indices that are the same gene in the main list.
+                    # I need to sort along the main dimension
+                    # Then get the top_x_pct average
+                    out_main_id+=[main_id[indices[0]]]
+                    tmp_main_score=np.array(main_score)[indices]
+                    score_list=np.array(tmp_main_score)
+                    nans_bool=np.invert(np.isnan(score_list))
+                    score_list=score_list[nans_bool]
+                    top_ind_top=int(np.ceil(len(score_list)*(1-top_fraction)))
+                    args_top=np.argsort(score_list)[min(top_ind_top, len(score_list)-1):]
+
+                    tmp_other1_id=np.array(other1_id)[indices][nans_bool][args_top][-1]
+                    tmp_other1_score=np.mean(np.array(other1_score)[indices][nans_bool][args_top])
+
+                    tmp_other2_id=np.array(other2_id)[indices][nans_bool][args_top][-1]
+                    tmp_other2_score=np.mean(np.array(other2_score)[indices][nans_bool][args_top])
+
+                    tmp_main_score=np.mean(tmp_main_score[nans_bool][args_top])
+
+                    print("AAA")
+                    print(main_id[indices[0]])
+                    print(tmp_other1_id)
+                    print(tmp_other2_id)
+                    print(tmp_other1_score)
+                    print(tmp_other2_score)
+
+
+
+                    out_main_id=[]
+                    out_main_score=[]
+                    out_other1_id=[]
+                    out_other1_score=[]
+                    out_other2_id=[]
+                    out_other2_score=[]
+                    input()
+
+            return out_main_id,out_main_score,out_other1_id,out_other1_score,out_other2_id,out_other2_score
+
+
+
+        #Not that the issue is : what do I take the top x pct of.
+        if opt=="top":
+            (self.save_all_ids_top, self.save_all_compare_top, self.save_all_ids_norm,
+             self.save_all_compare_norm, self.save_all_ids_ref, self.save_all_compare)=(
+                get_average(self.save_all_ids_top,self.save_all_compare_top,self.save_all_ids_norm,
+                            self.save_all_compare_norm,self.save_all_ids_ref,self.save_all_compare,top_fraction))
+        #
+        # elif opt=="norm":
+        #
+        # elif opt=="ref":
+        #
+def get_orth_id(list):
+    return [list[i].split('__')[0] for i in range(len(list))]
+
 
 def find_matching_folded_domains(bounds,bounds_ref,seq_oth,seq_ref,length_max_ratio=0.8,homology_min=0.4):
     bound_match=[]
@@ -118,6 +199,7 @@ def find_matching_folded_domains(bounds,bounds_ref,seq_oth,seq_ref,length_max_ra
 def get_sub_mat(name):
     from Bio.Align import substitution_matrices
     return substitution_matrices.load(name)
+
 def get_homology_score(seq_ref,seq,local,sub_mat):
     seq_ref=skbio.sequence.Protein(seq_ref)
     seq=skbio.sequence.Protein(seq)
